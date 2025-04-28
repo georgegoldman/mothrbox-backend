@@ -1,15 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HttpModule } from '@nestjs/axios';
-import { StorageController } from './storage/storage.controller';
-import { EncryptionService } from './encryption/encryption.service';
-import { StorageService } from './storage/storage.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UserModule } from './users/users.module';
+import { DB_CONNECTION_STRING } from 'libs/utils/src/util.constants';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [HttpModule, MongooseModule.forRoot('mongodb://localhost/nest')],
-  controllers: [AppController, StorageController],
-  providers: [AppService, EncryptionService, StorageService],
+  imports: [
+    UserModule,
+    MongooseModule.forRoot(DB_CONNECTION_STRING),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

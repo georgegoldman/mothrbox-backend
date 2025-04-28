@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as bcrypt from 'bcrypt';
 import { CRYPTO_SECRET } from './util.constants';
-import HashIds from 'hashids';
+import Hashids = require('hashids');
 import crypto from 'crypto';
 
 /**
@@ -40,7 +41,7 @@ export function generateSecret(length = 16) {
   return crypto.randomBytes(length).toString('hex');
 }
 
-const hashIds = new HashIds(CRYPTO_SECRET, 12);
+const hashIds = new Hashids(CRYPTO_SECRET, 12);
 
 /**
  *
