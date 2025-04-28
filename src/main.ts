@@ -102,7 +102,7 @@ async function bootstrap() {
   }
   // Start the server with proper error handling
   try {
-    const port = PORT;
+    const port = PORT || 3000;
     await app.listen(port, '0.0.0.0');
     logger.log(`Application started successfully on port ${port}`);
   } catch (err) {

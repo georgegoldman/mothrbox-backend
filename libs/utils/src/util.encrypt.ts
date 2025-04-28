@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { CRYPTO_SECRET } from './util.constants';
 import Hashids = require('hashids');
 import crypto from 'crypto';
+// const Hashids = require('hashids');
 
 /**
  *

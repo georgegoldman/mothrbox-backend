@@ -93,4 +93,10 @@ export class UserService {
     if (user == null) throw new NotFoundError('user not found');
     return user;
   }
+
+  async getUserByEmailIncludePassword(
+    email: string,
+  ): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email }).select('+password');
+  }
 }
