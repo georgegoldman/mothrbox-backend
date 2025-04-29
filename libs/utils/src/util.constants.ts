@@ -7,10 +7,9 @@ config();
 
 export const CRYPTO_SECRET = process.env.CRYPTO_SECRET as string;
 
-export const JWT_SECRET = readFileSync(
-  join(process.cwd(), 'secrets', 'private_key.pem'),
-  'utf-8',
-);
+export const JWT_SECRET =
+  process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, '\n') ||
+  readFileSync(join(process.cwd(), 'secrets', 'private_key.pem'), 'utf-8');
 
 // db
 export const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING as string;
