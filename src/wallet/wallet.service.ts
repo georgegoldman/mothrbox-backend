@@ -5,8 +5,8 @@ import { Model } from 'mongoose';
 import { Wallet, WalletDocument } from './wallet.schema';
 import { UserDocument } from 'src/users/user.shemas';
 import {
-  generateSecret,
   generateWallet,
+  generateSecret,
 } from 'src/config/utils/src/util.encrypt';
 
 @Injectable()

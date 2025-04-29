@@ -1,5 +1,5 @@
 // src/common/dtos/index.ts
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 export class UploadFileDto {
   userId: string;
   recipientPublicKey: string;
@@ -21,14 +21,6 @@ export class UserDto {
   @IsNotEmpty()
   @IsString()
   password: string;
-}
-export class WalletNonceDto {
-  @IsNotEmpty()
-  walletAddress: string;
-
-  @IsOptional()
-  @IsString()
-  userId?: string;
 }
 
 export class WalletLoginDto {

@@ -20,8 +20,7 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyCors from '@fastify/cors';
 import * as qs from 'qs';
 import { COOKIE_SECRET, PORT } from 'src/config/utils/src/util.constants';
-
-import { CacheHelperUtil } from 'src/config/utils/src/util.redis';
+import { CacheHelperUtil } from './config/utils/src/util.redis';
 
 async function bootstrap() {
   // configure comprehensive winston logging
