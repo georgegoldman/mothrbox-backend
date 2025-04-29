@@ -36,7 +36,6 @@ export class AuthService {
     if (!passwordMatch) {
       throw new BadRequestException('Incorrect Password');
     }
-    console.log(JWT_SECRET);
     const token = this.jwtService.sign(
       { _id: user._id.toString() },
       {

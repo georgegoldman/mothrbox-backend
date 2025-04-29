@@ -41,7 +41,6 @@ export class UserController {
   async deleteUser(@Param('id') id: string) {
     try {
       const userId = new Types.ObjectId(id);
-      console.log('getting here');
       await this.userService.remove(userId);
       return { message: 'User successfully deleted' };
     } catch (error) {
