@@ -11,14 +11,8 @@ import { UserService } from 'src/users/user.service';
 import { UnauthorizedError, ValidationError } from 'libs/utils/src/util.errors';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { config } from 'dotenv';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { JWT_SECRET } from 'libs/utils/src/util.constants';
 config();
-
-const privateKey = readFileSync(
-  join(process.cwd(), 'secrets', 'private_key.pem'),
-  'utf-8',
-);
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -27,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       passReqToCallback: true,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: privateKey.toString(),
+      secretOrKey: JWT_SECRET,
     });
   }
 
