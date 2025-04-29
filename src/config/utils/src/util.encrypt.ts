@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import * as bcrypt from 'bcrypt';
-import { CRYPTO_SECRET } from './util.constants';
+import { CRYPTO_SECRET, walletMessagePrefix } from './util.constants';
 import Hashids = require('hashids');
-import crypto from 'crypto';
+import * as crypto from 'crypto';
+import { ethers } from 'ethers';
 // const Hashids = require('hashids');
 
 /**
@@ -57,10 +61,46 @@ export function decryptObjectId(shortId) {
   return hashIds.decodeHex(shortId);
 }
 
+export function generateWallet() {
+  const wallet = ethers.Wallet.createRandom();
+
+  return {
+    walletAddress: wallet.address,
+    privateKey: wallet.privateKey,
+    mnemonic: wallet.mnemonic?.phrase || '',
+  };
+}
+
+export function createSignatureMessage(walletAddress: string, nonce: string) {
+  return `${walletMessagePrefix}\nWallet: ${walletAddress}\nNonce: ${nonce}`;
+}
+
+export function verifyWalletSignature(
+  message: string,
+  signature: string,
+  walletAddress: string,
+) {
+  try {
+    // Verify the signature using ethers.js
+    const recoveredAddress = ethers.verifyMessage(message, signature);
+    console.log('recoveredAddress', recoveredAddress);
+
+    // Compare the recovered address with the provided wallet address (case-insensitive)
+    return recoveredAddress.toLowerCase() === walletAddress.toLowerCase();
+  } catch (error: unknown) {
+    console.error('Error verifying wallet signature', error, {
+      walletAddress,
+    });
+    return false;
+  }
+}
 export default {
   encryptPassword,
   verifyPassword,
   generateSecret,
   decryptObjectId,
   encryptObjectId,
+  generateWallet,
+  createSignatureMessage,
+  verifyWalletSignature,
 };
