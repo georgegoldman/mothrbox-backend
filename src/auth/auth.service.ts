@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { verifyPassword } from 'libs/utils/src/util.encrypt';
 import { UserDto } from 'src/common/dtos';
@@ -18,7 +19,6 @@ export class AuthService {
 
   async register(payload: UserDto) {
     const user = await this.userService.createUser(payload);
-
     return user;
   }
 
@@ -36,13 +36,14 @@ export class AuthService {
     if (!passwordMatch) {
       throw new BadRequestException('Incorrect Password');
     }
-
+    console.log(JWT_SECRET);
     const token = this.jwtService.sign(
-      { _id: user._id },
+      { _id: user._id.toString() },
       {
-        secret: JWT_SECRET,
+        secret: JWT_SECRET.toString(),
       },
     );
+
     delete user['_doc'].password;
 
     return {

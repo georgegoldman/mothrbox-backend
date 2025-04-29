@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
@@ -10,7 +11,14 @@ import { UserService } from 'src/users/user.service';
 import { UnauthorizedError, ValidationError } from 'libs/utils/src/util.errors';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { config } from 'dotenv';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 config();
+
+const privateKey = readFileSync(
+  join(process.cwd(), 'secrets', 'private_key.pem'),
+  'utf-8',
+);
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -19,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       passReqToCallback: true,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: privateKey.toString(),
     });
   }
 

@@ -13,7 +13,7 @@ import { JWT_SECRET } from 'libs/utils/src/util.constants';
     {
       ...JwtModule.register({
         secret: JWT_SECRET,
-        signOptions: { expiresIn: '365d' },
+        signOptions: { expiresIn: '365d', algorithm: 'RS256' },
       }),
       global: true,
     },
