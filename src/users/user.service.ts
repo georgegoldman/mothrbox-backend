@@ -102,4 +102,10 @@ export class UserService {
   ): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).select('+password');
   }
+
+  async findOneAndUpdate(filter: any, update: any, options?: any) {
+    return this.userModel
+      .findOneAndUpdate(filter, update, { new: true, ...options })
+      .exec();
+  }
 }

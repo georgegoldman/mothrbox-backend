@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserDto } from 'src/common/dtos';
 import { AllowAny, NoCache } from './auth.decorator';
+import { UserDto, WalletLoginDto } from 'src/common/dtos';
 
 @NoCache()
 @Controller('auth')
@@ -19,5 +19,15 @@ export class AuthController {
   @Post('login')
   async login(@Body() payload: UserDto) {
     return await this.authService.login(payload);
+  }
+
+  @Get('wallet-nonce/:walletAddress')
+  async getWalletNonce(@Param('walletAddress') walletAddress: string) {
+    return this.authService.generateWalletAuthNonce(walletAddress);
+  }
+
+  @Post('wallet-login')
+  async walletLogin(@Body() payload: WalletLoginDto) {
+    return this.authService.loginWithWallet(payload);
   }
 }

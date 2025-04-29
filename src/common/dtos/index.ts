@@ -22,3 +22,15 @@ export class UserDto {
   @IsString()
   password: string;
 }
+
+export class WalletLoginDto {
+  @IsNotEmpty({ message: 'Wallet address is required' })
+  walletAddress: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Signature is required' })
+  signature: string;
+
+  @IsString()
+  nonce: string;
+}
