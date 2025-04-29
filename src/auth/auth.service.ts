@@ -4,11 +4,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { verifyPassword } from 'libs/utils/src/util.encrypt';
+import { verifyPassword } from 'src/config/utils/src/util.encrypt';
 import { UserDto } from 'src/common/dtos';
 import { UserService } from 'src/users/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from 'libs/utils/src/util.constants';
+import { JWT_SECRET } from 'src/config/utils/src/util.constants';
 
 @Injectable()
 export class AuthService {

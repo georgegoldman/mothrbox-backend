@@ -3,9 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.shemas';
 import { FilterQuery, Model, SortOrder, Types } from 'mongoose';
-import { encryptPassword } from 'libs/utils/src/util.encrypt';
-import { IntegrityError, NotFoundError } from 'libs/utils/src/util.errors';
-import { paginate, PaginatedDoc } from 'libs/utils/src/util.pagination';
+import { encryptPassword } from 'src/config/utils/src/util.encrypt';
+import {
+  IntegrityError,
+  NotFoundError,
+} from 'src/config/utils/src/util.errors';
+import { paginate, PaginatedDoc } from 'src/config/utils/src/util.pagination';
 
 interface UserParams {
   email: string;

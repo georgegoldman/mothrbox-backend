@@ -8,10 +8,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { UserService } from 'src/users/user.service';
-import { UnauthorizedError, ValidationError } from 'libs/utils/src/util.errors';
+import {
+  UnauthorizedError,
+  ValidationError,
+} from 'src/config/utils/src/util.errors';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { config } from 'dotenv';
-import { JWT_SECRET } from 'libs/utils/src/util.constants';
+import { JWT_SECRET } from 'src/config/utils/src/util.constants';
 config();
 
 @Injectable()

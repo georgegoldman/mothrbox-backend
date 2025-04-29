@@ -12,14 +12,14 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
-import { AllExceptionsFilter } from 'libs/utils/src/utils.logger';
+import { AllExceptionsFilter } from 'src/config/utils/src/utils.logger';
 import { WsAdapter } from '@nestjs/platform-ws';
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import fastifyCors from '@fastify/cors';
 import * as qs from 'qs';
-import { COOKIE_SECRET, PORT } from 'libs/utils/src/util.constants';
+import { COOKIE_SECRET, PORT } from 'src/config/utils/src/util.constants';
 
 async function bootstrap() {
   // configure comprehensive winston logging
