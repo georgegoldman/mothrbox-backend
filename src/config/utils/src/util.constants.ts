@@ -22,9 +22,6 @@ export const COOKIE_SECRET = process.env.COOKIE_SECRET as string;
 // Server
 export const PORT = parseInt(process.env.PORT as string);
 
-// redis
-export const REDIS_URL = process.env.REDIS_URL as string;
-
 // auth constants
 export const nonceRateLimitWindow = 60; // 1 minute in seconds
 export const nonceRateLimitMax = 4; // Maximum nonce requests per minute

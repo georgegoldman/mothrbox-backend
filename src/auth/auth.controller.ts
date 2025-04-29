@@ -22,7 +22,7 @@ export class AuthController {
   }
 
   @Get('wallet-nonce/:walletAddress')
-  async getWalletNonce(@Param('walletAddress') walletAddress: string) {
+  getWalletNonce(@Param('walletAddress') walletAddress: string) {
     return this.authService.generateWalletAuthNonce(walletAddress);
   }
 

@@ -8,7 +8,6 @@ import { CRYPTO_SECRET, walletMessagePrefix } from './util.constants';
 import Hashids = require('hashids');
 import * as crypto from 'crypto';
 import { ethers } from 'ethers';
-// const Hashids = require('hashids');
 
 /**
  *
