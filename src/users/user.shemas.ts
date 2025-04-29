@@ -10,6 +10,12 @@ export class User {
 
   @Prop()
   password: string;
+
+  @Prop({ unique: true, sparse: true })
+  walletAddress: string;
+
+  @Prop()
+  walletNonce: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

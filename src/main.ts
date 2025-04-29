@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -20,6 +20,8 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyCors from '@fastify/cors';
 import * as qs from 'qs';
 import { COOKIE_SECRET, PORT } from 'src/config/utils/src/util.constants';
+
+import { CacheHelperUtil } from 'src/config/utils/src/util.redis';
 
 async function bootstrap() {
   // configure comprehensive winston logging
@@ -109,6 +111,8 @@ async function bootstrap() {
   } catch (err) {
     logger.error(`Failed to start server: ${err.message}`);
   }
+
+  await CacheHelperUtil.initializeRedis();
 }
 bootstrap().catch((err) => {
   console.error('failed to bootstrap application: ', err);
