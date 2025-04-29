@@ -16,13 +16,8 @@ import {
 import { UserDto, WalletLoginDto } from 'src/common/dtos';
 import { UserService } from 'src/users/user.service';
 import { JwtService } from '@nestjs/jwt';
-import {
-  JWT_SECRET,
-  nonceRateLimitMax,
-  nonceRateLimitWindow,
-} from 'src/config/utils/src/util.constants';
-import BaseError, { UnauthorizedError } from 'src/config/utils/src/util.errors';
-import { CacheHelperUtil } from 'src/config/utils/src/util.redis';
+import { JWT_SECRET } from 'src/config/utils/src/util.constants';
+import { UnauthorizedError } from 'src/config/utils/src/util.errors';
 
 @Injectable()
 export class AuthService {
@@ -72,50 +67,13 @@ export class AuthService {
     }
   }
 
-  async generateWalletAuthNonce(walletAddress: string) {
+  generateWalletAuthNonce(walletAddress: string) {
     try {
-      // Check rate limiting.
-      const rateLimitKey =
-        CacheHelperUtil.cacheKeys.walletNonceRateLimit(walletAddress);
-      console.log('Rate limit key:', rateLimitKey);
-      let currentRequests =
-        await CacheHelperUtil.getCache<number>(rateLimitKey);
-      const ttl = await CacheHelperUtil.getTtl(rateLimitKey);
-      console.log('Rate limit key:', currentRequests);
-
-      if (currentRequests && ttl <= 0) {
-        await CacheHelperUtil.removeFromCache(rateLimitKey);
-        currentRequests = 0;
-      }
-
-      if (currentRequests && currentRequests >= nonceRateLimitMax) {
-        throw new BaseError(
-          `Too many requests. Please try again in ${Math.ceil(ttl || 0)} seconds.`,
-          429,
-        );
-      }
-
       // Generate a nonce
       const nonce = generateSecret();
       console.log('Rate limit key:', nonce);
 
       const message = createSignatureMessage(walletAddress, nonce);
-      console.log('Rate limit key:', message);
-
-      // Store nonce in Redis with expiration
-      const nonceKey = CacheHelperUtil.cacheKeys.walletNonce(walletAddress);
-      console.log('Rate limit key:', nonceKey);
-
-      await CacheHelperUtil.setCache(nonceKey, nonce, nonceRateLimitWindow);
-
-      // Update rate limiting (preserve existing window)
-      const newRateLimit = currentRequests ? currentRequests + 1 : 1;
-      console.log('Rate limit key:', newRateLimit);
-
-      const newTtl = !currentRequests ? nonceRateLimitWindow : ttl;
-      console.log('Rate limit key:', newTtl);
-
-      await CacheHelperUtil.setCache(rateLimitKey, newRateLimit, newTtl);
 
       return {
         nonce,
@@ -128,24 +86,6 @@ export class AuthService {
   }
 
   async loginWithWallet(payload: WalletLoginDto) {
-    // Verify nonce exists and hasn't expired
-    const nonceKey = CacheHelperUtil.cacheKeys.walletNonce(
-      payload.walletAddress,
-    );
-    const storedNonce = await CacheHelperUtil.getCache<string>(nonceKey);
-
-    // TODO: ENABLE NONCE CHECKING
-    if (!storedNonce) {
-      throw new UnauthorizedError(
-        'Invalid or expired nonce. Please request a new one.',
-        401,
-      );
-    }
-
-    if (storedNonce !== payload.nonce) {
-      throw new UnauthorizedError('Invalid nonce.', 401);
-    }
-
     // Recreate the message that was signed
     const message = createSignatureMessage(
       payload.walletAddress,
@@ -163,11 +103,7 @@ export class AuthService {
       throw new UnauthorizedError('Invalid wallet signature.', 401);
     }
 
-    // Remove the used nonce immediately
-    await CacheHelperUtil.removeFromCache(nonceKey);
-
     const now = new Date();
-
     const result = await this.userService.findOneAndUpdate(
       {
         walletAddress: payload.walletAddress,
@@ -194,7 +130,6 @@ export class AuthService {
       throw new UnauthorizedError('Failed to create or find user', 401);
     }
 
-    // Generate JWT token
     const token = this.jwtService.sign({
       _id: user._id,
     });
