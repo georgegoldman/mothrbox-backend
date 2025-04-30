@@ -2,7 +2,7 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AllowAny, NoCache } from './auth.decorator';
-import { UserDto, WalletLoginDto } from 'src/common/dtos';
+import { CreateUserDto, LoginDto, WalletLoginDto } from 'src/common/dtos';
 
 @NoCache()
 @Controller('auth')
@@ -11,13 +11,13 @@ export class AuthController {
 
   @AllowAny()
   @Post('register')
-  async register(@Body() payload: UserDto) {
+  async register(@Body() payload: CreateUserDto) {
     return await this.authService.register(payload);
   }
 
   @AllowAny()
   @Post('login')
-  async login(@Body() payload: UserDto) {
+  async login(@Body() payload: LoginDto) {
     return await this.authService.login(payload);
   }
 

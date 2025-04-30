@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -14,7 +13,7 @@ import {
   NotFoundError,
 } from 'src/config/utils/src/util.errors';
 import { paginate, PaginatedDoc } from 'src/config/utils/src/util.pagination';
-import { UserDto } from 'src/common/dtos';
+import { CreateUserDto } from 'src/common/dtos';
 
 interface UserParams {
   email: string;
@@ -27,16 +26,24 @@ export class UserService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async createUser(payload: UserDto): Promise<UserDocument> {
+  async createUser(payload: CreateUserDto): Promise<UserDocument> {
     try {
-      const [userWithEmailExists] = await Promise.all([
+      if (!payload.email && !payload.phone) {
+        throw new BadRequestException('Either email or phone is required');
+      }
+
+      const [userWithEmailExists, userWithPhoneExists] = await Promise.all([
         this.userModel.exists({ email: payload.email }),
+        this.userModel.exists({ phone: payload.phone }),
       ]);
 
       if (userWithEmailExists) {
         throw new BadRequestException('User with this email already exists');
       }
 
+      if (userWithPhoneExists) {
+        throw new BadRequestException('User with this phone already exists');
+      }
       const hashedPassword = encryptPassword(payload.password);
 
       const createdUser = await this.userModel.create({
@@ -49,7 +56,8 @@ export class UserService {
     } catch (e) {
       console.error('Error while creating user', e);
       if (e.code === 11000) {
-        throw new IntegrityError(`${Object.keys(e.keyValue)} already exists`);
+        const keys = Object.keys(e.keyValue).join(', ');
+        throw new IntegrityError(`${keys} already exists`);
       } else {
         throw new InternalServerErrorException(
           e.response?.message || 'Something went wrong',
@@ -120,10 +128,10 @@ export class UserService {
     return user;
   }
 
-  async getUserByEmailIncludePassword(
-    email: string,
+  async getUserDetailsWithPassword(
+    query: FilterQuery<User>,
   ): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).select('+password');
+    return this.userModel.findOne(query).select('+password');
   }
 
   async findOneAndUpdate(filter: any, update: any, options?: any) {
