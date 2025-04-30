@@ -5,7 +5,7 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ unique: true, index: true })
   email: string;
 
   @Prop({ select: false })
@@ -18,7 +18,10 @@ export class User {
   walletNonce: string;
 
   @Prop({ required: false, default: null, index: true })
-  name: string;
+  username: string;
+
+  @Prop({ unique: true })
+  phone: string;
 
   @Prop({ required: false, default: null })
   profilePhoto: string;
