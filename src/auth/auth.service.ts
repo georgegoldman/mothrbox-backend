@@ -13,7 +13,7 @@ import {
   verifyPassword,
   verifyWalletSignature,
 } from 'src/config/utils/src/util.encrypt';
-import { UserDto, WalletLoginDto } from 'src/common/dtos';
+import { CreateUserDto, LoginDto, WalletLoginDto } from 'src/common/dtos';
 import { UserService } from 'src/users/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'src/config/utils/src/util.constants';
@@ -26,17 +26,23 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(payload: UserDto) {
+  async register(payload: CreateUserDto) {
     const user = await this.userService.createUser(payload);
 
     return user;
   }
 
-  async login(payload: UserDto) {
+  async login(payload: LoginDto) {
     try {
-      const { email, password } = payload;
+      const { email, phone, password } = payload;
 
-      const user = await this.userService.getUserByEmailIncludePassword(email);
+      if (!email && !phone) {
+        throw new BadRequestException('Email or phone is required');
+      }
+
+      const user = await this.userService.getUserDetailsWithPassword({
+        $or: [{ email }, { phone }],
+      });
 
       if (!user) {
         throw new BadRequestException('Invalid Credential');
