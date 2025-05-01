@@ -34,7 +34,7 @@ export class UserService {
 
       const [userWithEmailExists, userWithPhoneExists] = await Promise.all([
         this.userModel.exists({ email: payload.email }),
-        this.userModel.exists({ phone: payload.phone }),
+        payload.phone ? this.userModel.exists({ phone: payload.phone }) : null,
       ]);
 
       if (userWithEmailExists) {

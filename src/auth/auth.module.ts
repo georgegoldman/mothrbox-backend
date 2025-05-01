@@ -13,7 +13,7 @@ import { UserModule } from 'src/users/users.module';
     {
       ...JwtModule.register({
         secret: JWT_SECRET,
-        signOptions: { expiresIn: '365d', algorithm: 'RS256' },
+        signOptions: { expiresIn: '365d' },
       }),
       global: true,
     },

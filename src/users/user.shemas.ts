@@ -20,7 +20,7 @@ export class User {
   @Prop({ required: false, default: null, index: true })
   username: string;
 
-  @Prop({ unique: true })
+  @Prop({ unique: true, index: true })
   phone: string;
 
   @Prop({ required: false, default: null })

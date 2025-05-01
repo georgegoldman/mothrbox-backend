@@ -40,9 +40,12 @@ export class AuthService {
         throw new BadRequestException('Email or phone is required');
       }
 
-      const user = await this.userService.getUserDetailsWithPassword({
-        $or: [{ email }, { phone }],
-      });
+      let user;
+      if (email) {
+        user = await this.userService.getUserDetailsWithPassword({ email });
+      } else if (phone) {
+        user = await this.userService.getUserDetailsWithPassword({ phone });
+      }
 
       if (!user) {
         throw new BadRequestException('Invalid Credential');
@@ -55,10 +58,9 @@ export class AuthService {
       }
 
       const token = this.jwtService.sign(
-        { _id: user._id },
+        { _id: user._id as string },
         {
           secret: JWT_SECRET,
-          algorithm: 'HS256',
         },
       );
 
