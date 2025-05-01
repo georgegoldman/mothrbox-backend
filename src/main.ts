@@ -17,7 +17,6 @@ import { WsAdapter } from '@nestjs/platform-ws';
 import helmet from '@fastify/helmet';
 import fastifyCsrf from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
-import fastifyCors from '@fastify/cors';
 import * as qs from 'qs';
 import { COOKIE_SECRET, PORT } from 'src/config/utils/src/util.constants';
 
@@ -76,6 +75,13 @@ async function bootstrap() {
     { logger: new ConsoleLogger({ json: false }) },
   );
 
+  // enable CORS using NestJS's method
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    methods: '*',
+    credentials: true,
+  });
+
   // Add global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -84,7 +90,6 @@ async function bootstrap() {
     }),
   );
   // Configure CORS, exception filter, and security
-  // app.enableCors();
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useWebSocketAdapter(new WsAdapter(app));
   // Register Fastify plugins with proper error handling
@@ -93,10 +98,6 @@ async function bootstrap() {
     await app.register(fastifyCsrf);
     await app.register(fastifyCookie, {
       secret: COOKIE_SECRET,
-    });
-    await app.register(fastifyCors, {
-      origin: ['http://localhost:3000'], // Enable CORS for localhost:3000
-      credentials: true, // Allow credentials (cookies, authorization headers, etc.)
     });
   } catch (err) {
     logger.error(`Failed to register Fastify plugins: ${err.message}`);
