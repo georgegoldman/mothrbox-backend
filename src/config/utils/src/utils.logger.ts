@@ -9,6 +9,7 @@ import {
   HttpStatus,
   ConsoleLogger,
 } from '@nestjs/common';
+import BaseError from './util.errors';
 
 @Catch() // No specific exception type => This will catch all exceptions
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -19,15 +20,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
 
+    // Check if it's a HttpException or our custom BaseError
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+        : exception instanceof BaseError
+          ? exception.code
+          : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const message =
       exception instanceof HttpException
         ? exception.getResponse()
-        : 'Internal server error';
+        : exception instanceof BaseError
+          ? exception.message
+          : 'Internal server error';
 
     // For Fastify, use send() instead of json()
     response.status(status).send({

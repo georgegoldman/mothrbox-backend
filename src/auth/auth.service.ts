@@ -2,11 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   createSignatureMessage,
   generateSecret,
@@ -17,7 +13,11 @@ import { CreateUserDto, LoginDto, WalletLoginDto } from 'src/common/dtos';
 import { UserService } from 'src/users/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from 'src/config/utils/src/util.constants';
-import { UnauthorizedError } from 'src/config/utils/src/util.errors';
+import BaseError, {
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from 'src/config/utils/src/util.errors';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +37,7 @@ export class AuthService {
       const { email, phone, password } = payload;
 
       if (!email && !phone) {
-        throw new BadRequestException('Email or phone is required');
+        throw new ValidationError('Email or phone is required');
       }
 
       let user;
@@ -48,13 +48,13 @@ export class AuthService {
       }
 
       if (!user) {
-        throw new BadRequestException('Invalid Credential');
+        throw new NotFoundError('Invalid Credential');
       }
 
       const passwordMatch = verifyPassword(password, user.password);
 
       if (!passwordMatch) {
-        throw new BadRequestException('Incorrect Password');
+        throw new ValidationError('Incorrect Password');
       }
 
       const token = this.jwtService.sign(
@@ -71,7 +71,11 @@ export class AuthService {
         accessToken: token,
       };
     } catch (error) {
-      throw new BadRequestException(error?.message || 'Login failed');
+      if (error instanceof BaseError) {
+        throw error;
+      } else {
+        throw new BaseError(error?.message || 'Login failed');
+      }
     }
   }
 
@@ -89,7 +93,7 @@ export class AuthService {
       };
     } catch (error) {
       console.error('Error generating wallet auth nonce:', error);
-      throw new InternalServerErrorException('Failed to generate wallet nonce');
+      throw new BaseError('Failed to generate wallet nonce');
     }
   }
 
