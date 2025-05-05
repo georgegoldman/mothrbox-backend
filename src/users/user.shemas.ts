@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { KeysEnum } from 'src/common/enums';
+import { KeyEnum } from 'src/common/enums';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -27,8 +27,8 @@ export class User {
   @Prop({ required: false, default: null })
   profilePhoto: string;
 
-  @Prop({ enum: KeysEnum, default: null })
-  keys: KeysEnum;
+  @Prop({ enum: KeyEnum, default: null })
+  keys: KeyEnum;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
