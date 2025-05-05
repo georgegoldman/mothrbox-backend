@@ -28,3 +28,6 @@ export const nonceRateLimitMax = 4; // Maximum nonce requests per minute
 
 // wallet constants
 export const walletMessagePrefix = `Sign this message to authenticate with ${APP_NAME}: `;
+
+// mothrbox
+export const MOTHRBOX_BASE_URL = process.env.MOTHRBOX_BASE_URL as string;
