@@ -1,6 +1,7 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { KeyService } from './key.service';
 import { GenerateKeyPairRequestDto, KeyPairResponseDto } from './key.dto';
+import { KeyPairDTO } from './issue-token.dto';
 
 @Controller('keys')
 export class KeyController {
@@ -12,5 +13,11 @@ export class KeyController {
     @Body() request: GenerateKeyPairRequestDto,
   ): Promise<KeyPairResponseDto> {
     return this.keyService.generateKeyPair(request);
+  }
+
+  @Post('issue')
+  async issueToken(@Body() payload: KeyPairDTO): Promise<{ token: string }> {
+    const token = await this.keyService.issueToken(payload);
+    return { token };
   }
 }

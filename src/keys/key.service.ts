@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -5,6 +6,7 @@ import { Model } from 'mongoose';
 import { Key } from './key.schema';
 import axios from 'axios';
 import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
+import { KeyPairDTO } from './issue-token.dto';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -48,6 +50,27 @@ export class KeyService {
         status: 500,
         message: 'An unexpected error occurred',
       };
+    }
+  }
+
+  async issueToken(payload: KeyPairDTO): Promise<string> {
+    try {
+      const response = await axios.post(
+        `${MOTHRBOX_BASE_URL}/issue-token`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      return response.data as string;
+    } catch (error) {
+      throw new Error(
+        `Failed to issue token: ${
+          error.response?.data || error.message || 'Unknown error'
+        }`,
+      );
     }
   }
 }
