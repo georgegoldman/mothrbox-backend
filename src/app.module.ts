@@ -7,12 +7,14 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { WalletModule } from './wallet/wallet.module';
 import { UserModule } from './users/users.module';
+import { KeysModule } from './keys/key.module';
 
 @Module({
   imports: [
     UserModule,
     AuthModule,
     WalletModule,
+    KeysModule,
     MongooseModule.forRoot(DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([
       {
