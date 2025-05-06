@@ -8,9 +8,11 @@ import { AuthModule } from './auth/auth.module';
 import { WalletModule } from './wallet/wallet.module';
 import { UserModule } from './users/users.module';
 import { KeysModule } from './keys/key.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     UserModule,
     AuthModule,
     WalletModule,

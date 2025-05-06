@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
@@ -7,6 +9,8 @@ import { Key } from './key.schema';
 import axios from 'axios';
 import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
 import { KeyPairDTO } from './issue-token.dto';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -20,7 +24,10 @@ interface KeyPairResponse {
 
 @Injectable()
 export class KeyService {
-  constructor(@InjectModel(Key.name) private readonly keyModel: Model<Key>) {}
+  constructor(
+    @InjectModel(Key.name) private readonly keyModel: Model<Key>,
+    private readonly httpService: HttpService,
+  ) {}
 
   async generateKeyPair(
     request: GenerateKeyPairRequest,
@@ -69,6 +76,25 @@ export class KeyService {
       throw new Error(
         `Failed to issue token: ${
           error.response?.data || error.message || 'Unknown error'
+        }`,
+      );
+    }
+  }
+
+  async getAllKeypairs(): Promise<any[]> {
+    try {
+      const response$ = this.httpService.get(`${MOTHRBOX_BASE_URL}/keypair`, {
+        headers: {
+          'x-api-key': '08af34fa-fe22-49cc-8bb9-aa552a7a40ef',
+        },
+      });
+
+      const response = await lastValueFrom(response$);
+      return response.data; // should be a list of keypairs
+    } catch (error) {
+      throw new Error(
+        `Failed to issue token: ${
+          error.response?.status || error.message || 'Unknown error'
         }`,
       );
     }
