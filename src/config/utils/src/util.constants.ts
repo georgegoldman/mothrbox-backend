@@ -31,3 +31,6 @@ export const walletMessagePrefix = `Sign this message to authenticate with ${APP
 
 // mothrbox
 export const MOTHRBOX_BASE_URL = process.env.MOTHRBOX_BASE_URL as string;
+
+// sui
+export const SECRIT = process.env.SECRIT as string;

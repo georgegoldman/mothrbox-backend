@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Controller,
   Post,
@@ -31,5 +32,10 @@ export class KeyController {
   @Get()
   async getKeypairs() {
     return this.keyService.getAllKeypairs();
+  }
+
+  @Get('walrus')
+  async confirm() {
+    return this.keyService.testWalrus();
   }
 }

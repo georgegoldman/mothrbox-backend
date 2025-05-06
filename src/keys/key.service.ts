@@ -7,10 +7,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Key } from './key.schema';
 import axios from 'axios';
-import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
+import { MOTHRBOX_BASE_URL, SECRIT } from 'src/config/utils/src/util.constants';
 import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { fromHex } from '@mysten/sui/utils';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -97,6 +99,42 @@ export class KeyService {
           error.response?.status || error.message || 'Unknown error'
         }`,
       );
+    }
+  }
+
+  async testWalrus(): Promise<any> {
+    try {
+      // const suiClient = new SuiClient({
+      //   url: getFullnodeUrl('testnet'),
+      // });
+      // const walrusClient = new WalrusClient({
+      //   network: 'testnet',
+      //   suiClient,
+      //   packageConfig: {
+      //     systemObjectId:
+      //       '0x98ebc47370603fe81d9e15491b2f1443d619d1dab720d586e429ed233e1255c1',
+      //     stakingPoolId:
+      //       '0x20266a17b4f1a216727f3eef5772f8d486a9e3b5e319af80a5b75809c035561d',
+      //   },
+      //   storageNodeClientOptions: {
+      //     fetch: (url, options) => {
+      //       console.log('fetching', url);
+      //       return fetch(url, options);
+      //     },
+      //     timeout: 60_000,
+      //   },
+      // });
+      // const file = new TextEncoder().encode('Hello from mothrbox!\n');
+      const keypair = Ed25519Keypair.fromSecretKey(SECRIT);
+
+      const publicKey = keypair.getPublicKey();
+      const message = new TextEncoder().encode('Hello from Mothrbox');
+
+      const { signature } = await keypair.signPersonalMessage(message);
+      const isValid = await publicKey.verifyPersonalMessage(message, signature);
+      return isValid;
+    } catch (error) {
+      console.log(error);
     }
   }
 }
