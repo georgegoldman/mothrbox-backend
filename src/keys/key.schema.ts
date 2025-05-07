@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { KeyEnum } from 'src/common/enums';
-import { User, UserDocument } from 'src/users/user.shemas';
+import { User } from 'src/users/user.shemas';
+import { string } from 'zod';
 
 export type KeyDocument = HydratedDocument<Key>;
 
@@ -12,13 +13,20 @@ export class Key {
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
   })
-  User: UserDocument;
+  User: Types.ObjectId;
 
-  @Prop({ enum: KeyEnum, default: null })
+  @Prop({
+    type: string,
+    enum: Object.values(KeyEnum),
+    required: true,
+  })
   type: KeyEnum;
 
   @Prop({ required: true })
-  value: string;
+  privateKey: string;
+
+  @Prop({ required: true })
+  publicKey: string;
 
   @Prop({ default: true })
   isActive: boolean;

@@ -24,6 +24,8 @@
     "@fastify/cors": "^11.0.1",
     "@fastify/csrf-protection": "^7.1.0",
     "@fastify/helmet": "^13.0.1",
+    "@mysten/sui": "^1.29.1",
+    "@mysten/walrus": "^0.0.21",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
