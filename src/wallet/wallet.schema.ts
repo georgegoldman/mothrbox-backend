@@ -13,9 +13,6 @@ export class Wallet {
   walletAddress: string;
 
   @Prop({ required: true })
-  privateKey: string;
-
-  @Prop({ required: true })
   mnemonic: string;
 
   @Prop({ default: false })

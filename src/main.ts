@@ -78,7 +78,7 @@ async function bootstrap() {
   // enable CORS using NestJS's method
   app.enableCors({
     origin: ['http://localhost:3000', 'https://mothrbox.vercel.app'],
-    methods: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 

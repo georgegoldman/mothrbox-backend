@@ -25,6 +25,7 @@
     "@fastify/csrf-protection": "^7.1.0",
     "@fastify/helmet": "^13.0.1",
     "@mysten/sui": "^1.29.1",
+    "@mysten/sui.js": "^0.54.1",
     "@mysten/walrus": "^0.0.21",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.1",
@@ -54,7 +55,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
