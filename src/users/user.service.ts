@@ -13,7 +13,7 @@ import {
   NotFoundError,
 } from 'src/config/utils/src/util.errors';
 import { paginate, PaginatedDoc } from 'src/config/utils/src/util.pagination';
-import { CreateUserDto } from 'src/common/dtos';
+import { CreateUserDto, UpdateProfileDto } from 'src/common/dtos';
 
 interface UserParams {
   email: string;
@@ -138,5 +138,50 @@ export class UserService {
     return this.userModel
       .findOneAndUpdate(filter, update, { new: true, ...options })
       .exec();
+  }
+
+  async updateProfile(userId: string, payload: UpdateProfileDto) {
+    const { username, email, phone } = payload;
+
+    if (username) {
+      const userWithUsernameExist = await this.userModel.findOne({
+        username,
+        _id: { $ne: userId },
+      });
+
+      if (userWithUsernameExist) {
+        throw new IntegrityError('Username already used, try another name');
+      }
+    }
+
+    if (email) {
+      const userWithEmailExist = await this.userModel.findOne({
+        email,
+        _id: { $ne: userId },
+      });
+
+      if (userWithEmailExist) {
+        throw new IntegrityError('email already used, try another name');
+      }
+    }
+
+    if (phone) {
+      const userWithPhoneExist = await this.userModel.findOne({
+        phone,
+        _id: { $ne: userId },
+      });
+
+      if (userWithPhoneExist) {
+        throw new IntegrityError('phone number already used, try another name');
+      }
+    }
+
+    return await this.userModel.findByIdAndUpdate(
+      userId,
+      { ...payload },
+      {
+        new: true,
+      },
+    );
   }
 }

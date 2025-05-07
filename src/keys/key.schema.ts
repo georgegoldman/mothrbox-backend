@@ -30,6 +30,9 @@ export class Key {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ default: 'AES' })
+  algorithm: string;
 }
 
 export const KeySchema = SchemaFactory.createForClass(Key);

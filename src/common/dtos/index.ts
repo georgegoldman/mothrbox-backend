@@ -64,3 +64,19 @@ export class CreateUserDto {
   @MaxLength(20)
   password: string;
 }
+
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
+  username: string;
+
+  @IsOptional()
+  @IsString()
+  @IsPhoneNumber()
+  phone: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEmail()
+  email: string;
+}

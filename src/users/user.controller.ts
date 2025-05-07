@@ -6,11 +6,13 @@
 import {
   All,
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
+  Patch,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -18,6 +20,7 @@ import { AllowAny, LoggedInUserDecorator } from 'src/auth/auth.decorator';
 import { NotFoundError } from 'rxjs';
 import { FilterQuery, Types } from 'mongoose';
 import { User, UserDocument } from './user.shemas';
+import { UpdateProfileDto } from 'src/common/dtos';
 
 interface GetUserQuey {
   email?: string;
@@ -81,5 +84,13 @@ export class UserController {
   @Get('/')
   async getCurrentUser(@LoggedInUserDecorator() user: UserDocument) {
     return await this.userService.findOne(user._id);
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @Body() payload: UpdateProfileDto,
+    @LoggedInUserDecorator() user: UserDocument,
+  ) {
+    return await this.userService.updateProfile(user._id.toString(), payload);
   }
 }

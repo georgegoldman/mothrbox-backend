@@ -19,7 +19,6 @@ export class WalletService {
       const nonce = generateSecret();
       const userWallet = await this.walletModel.create({
         walletAddress: wallet.walletAddress,
-        privateKey: wallet.privateKey,
         mnemonic: wallet.mnemonic,
         user: user._id,
       });
