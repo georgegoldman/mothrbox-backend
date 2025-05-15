@@ -12,7 +12,11 @@ import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { fromHex } from '@mysten/sui/utils';
+// import { fromHex } from '@mysten/sui/utils';
+import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
+import { WalrusClient } from '@mysten/walrus';
+import { Agent, setGlobalDispatcher } from 'undici';
+import PQueue from 'p-queue';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -103,36 +107,60 @@ export class KeyService {
   }
 
   async testWalrus(): Promise<any> {
+    const queue = new PQueue({ concurrency: 50 });
     try {
-      // const suiClient = new SuiClient({
-      //   url: getFullnodeUrl('testnet'),
-      // });
-      // const walrusClient = new WalrusClient({
-      //   network: 'testnet',
-      //   suiClient,
-      //   packageConfig: {
-      //     systemObjectId:
-      //       '0x98ebc47370603fe81d9e15491b2f1443d619d1dab720d586e429ed233e1255c1',
-      //     stakingPoolId:
-      //       '0x20266a17b4f1a216727f3eef5772f8d486a9e3b5e319af80a5b75809c035561d',
-      //   },
-      //   storageNodeClientOptions: {
-      //     fetch: (url, options) => {
-      //       console.log('fetching', url);
-      //       return fetch(url, options);
-      //     },
-      //     timeout: 60_000,
-      //   },
-      // });
-      // const file = new TextEncoder().encode('Hello from mothrbox!\n');
+      setGlobalDispatcher(
+        new Agent({
+          connectTimeout: 60_000,
+          connect: { timeout: 60_000 },
+        }),
+      );
+      const suiClient = new SuiClient({
+        url: getFullnodeUrl('testnet'),
+      });
+      const walrusClient = new WalrusClient({
+        network: 'testnet',
+        suiClient,
+        storageNodeClientOptions: {
+          onError: (error) => console.log(error),
+          fetch: (url, options): Promise<Response> => {
+            return queue.add(() => fetch(url, options)) as Promise<Response>;
+          },
+          timeout: 90000000000000,
+        },
+        packageConfig: {
+          systemObjectId:
+            '0x6c2547cbbc38025cf3adac45f63cb0a8d12ecf777cdc75a4971612bf97fdf6af',
+          stakingPoolId:
+            '0xbe46180321c30aab2f8b3501e24048377287fa708018a5b7c2792b35fe339ee3',
+          subsidiesObjectId:
+            '0xda799d85db0429765c8291c594d334349ef5bc09220e79ad397b30106161a0af',
+          exchangeIds: [
+            '0xf4d164ea2def5fe07dc573992a029e010dba09b1a8dcbc44c5c2e79567f39073',
+            '0x19825121c52080bb1073662231cfea5c0e4d905fd13e95f21e9a018f2ef41862',
+            '0x83b454e524c71f30803f4d6c302a86fb6a39e96cdfb873c2d1e93bc1c26a3bc5',
+            '0x8d63209cf8589ce7aef8f262437163c67577ed09f3e636a9d8e0813843fb8bf1',
+          ],
+        },
+      });
+
       const keypair = Ed25519Keypair.fromSecretKey(SECRIT);
+      const file = new TextEncoder().encode(
+        'Hi from the Mothrbox Backend!!!\n',
+      );
 
-      const publicKey = keypair.getPublicKey();
-      const message = new TextEncoder().encode('Hello from Mothrbox');
-
-      const { signature } = await keypair.signPersonalMessage(message);
-      const isValid = await publicKey.verifyPersonalMessage(message, signature);
-      return isValid;
+      const result = await walrusClient.writeBlob({
+        blob: file,
+        deletable: false,
+        epochs: 24,
+        signer: keypair,
+      });
+      console.log('the result');
+      console.log(result);
+      // return result;
+      // console.log('this is the write blob');
+      // console.log(blobId);
+      // return blobId;
     } catch (error) {
       console.log(error);
     }
