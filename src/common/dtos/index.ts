@@ -8,10 +8,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
 export class UploadFileDto {
-  userId: string;
   recipientPublicKey: string;
-  fileContent: string;
+  fileContent?: string;
   metadata?: Record<string, any>;
 }
 

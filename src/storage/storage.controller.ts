@@ -1,42 +1,37 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
 import { UploadFileDto } from '../common/dtos';
-import { EncryptionService } from '../encryption/encryption.service';
 import { StorageService } from './storage.service';
-import { v4 as uuidv4 } from 'uuid';
+import { LoggedInUserDecorator } from 'src/auth/auth.decorator';
+import { UserDocument } from 'src/users/user.shemas';
+import { FastifyRequest } from 'fastify';
 
 @Controller('files')
 export class StorageController {
-  constructor(
-    private readonly encryptionService: EncryptionService,
-    private readonly storageService: StorageService,
-  ) {}
+  constructor(private readonly storageService: StorageService) {}
 
   @Post('upload')
-  async uploadFile(@Body() uploadFileDto: UploadFileDto) {
-    const fileId = uuidv4();
-    const encrypted = await this.encryptionService.encryptFile(uploadFileDto);
+  async handleFileUpload(
+    @Req() req: FastifyRequest,
+    @LoggedInUserDecorator() user: UserDocument,
+    @Body() payload: UploadFileDto,
+  ) {
+    if (!req.files) {
+      return { message: 'Multipart not configured correctly.' };
+    }
 
-    const metadata = {
-      ...uploadFileDto.metadata,
-      fileId,
-      userId: uploadFileDto.userId,
-      ephemeralPublicKey: encrypted.ephemeralPublicKey,
-      timestamp: new Date().toISOString(),
-    };
+    return this.storageService.uploadFile(req.files(), user, payload);
+  }
 
-    const storageUrl = this.storageService.storeFile(
-      fileId,
-      encrypted.encryptedData,
-    );
+  @Get(':fileId')
+  async getFileById(@Param('fileId') fileId: string) {
+    return await this.storageService.getFileById(fileId);
+  }
 
-    return {
-      fileId,
-      storageUrl,
-      ephemeralPublicKey: encrypted.ephemeralPublicKey,
-    };
+  @Post()
+  async uploadFile(
+    @LoggedInUserDecorator() user: UserDocument,
+    @Body() payload: UploadFileDto,
+  ) {
+    return await this.storageService.handleFileUpload(user, payload);
   }
 }

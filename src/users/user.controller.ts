@@ -48,17 +48,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  async deleteUser(@Param() id: string) {
-    try {
-      const userId = new Types.ObjectId(id);
-      (await this.userService.remove(userId)) as any;
-      return { message: 'User successfully deleted' };
-      // Probably send an email informing the user that he/she has been deleted...
-    } catch (error) {
-      if (error instanceof NotFoundError)
-        throw new NotFoundException(error.message, error.name);
-      throw new BadRequestException(error.message);
-    }
+  async deleteUser(@Param() _id: string) {
+    return await this.userService.remove(_id);
   }
 
   @AllowAny()
