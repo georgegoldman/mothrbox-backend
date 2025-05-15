@@ -832,12 +832,10 @@ packages:
 
   '@mongodb-js/saslprep@1.2.2':
     resolution: {integrity: sha512-EB0O3SCSNRUFk66iRCpI+cXzIjdswfCs7F6nOC3RAGJ7xr5YhaicvsRwJ9eyzYvYRlCSDUO/c7g4yNulxKC1WA==}
-
   '@msgpack/msgpack@3.1.1':
     resolution: {integrity: sha512-DnBpqkMOUGayNVKyTLlkM6ILmU/m/+VUxGkuQlPQVAcvreLz5jn1OlQnWd8uHKL/ZSiljpM12rjRhr51VtvJUQ==}
     engines: {node: '>= 18'}
-
-  '@mysten/bcs@0.11.1':
+  '@mystebcs@0.11.1':
     resolution: {integrity: sha512-xP85isNSYUCHd3O/g+TmZYmg4wK6cU8q/n/MebkIGP4CYVJZz2wU/G24xIZ3wI+0iTop4dfgA5kYrg/DQKCUzA==}
 
   '@mysten/bcs@1.6.1':
@@ -5090,9 +5088,7 @@ snapshots:
   '@mongodb-js/saslprep@1.2.2':
     dependencies:
       sparse-bitfield: 3.0.3
-
-  '@msgpack/msgpack@3.1.1': {}
-
+  '@msgpack/msgpack@3.1.1':
   '@mysten/bcs@0.11.1':
     dependencies:
       bs58: 5.0.0
