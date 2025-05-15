@@ -4,7 +4,7 @@ import { KeyEnum } from 'src/common/enums';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ unique: true, index: true })
   email: string;

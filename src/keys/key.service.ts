@@ -12,7 +12,6 @@ import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { fromHex } from '@mysten/sui/utils';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -35,7 +34,7 @@ export class KeyService {
     request: GenerateKeyPairRequest,
   ): Promise<KeyPairResponse> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/generate-keypairs`,
         request,
         {
@@ -64,7 +63,7 @@ export class KeyService {
 
   async issueToken(payload: KeyPairDTO): Promise<string> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/issue-token`,
         payload,
         {
@@ -125,6 +124,7 @@ export class KeyService {
       //   },
       // });
       // const file = new TextEncoder().encode('Hello from mothrbox!\n');
+
       const keypair = Ed25519Keypair.fromSecretKey(SECRIT);
 
       const publicKey = keypair.getPublicKey();
@@ -132,9 +132,10 @@ export class KeyService {
 
       const { signature } = await keypair.signPersonalMessage(message);
       const isValid = await publicKey.verifyPersonalMessage(message, signature);
-      return isValid;
+      return { isValid };
     } catch (error) {
-      console.log(error);
+      console.log('Error in testWalrus:', error);
+      // return { success: false, error: error.message };
     }
   }
 }

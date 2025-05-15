@@ -8,10 +8,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
 export class UploadFileDto {
-  userId: string;
   recipientPublicKey: string;
-  fileContent: string;
+  fileContent?: string;
   metadata?: Record<string, any>;
 }
 
@@ -63,4 +63,20 @@ export class CreateUserDto {
   @MinLength(4)
   @MaxLength(20)
   password: string;
+}
+
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
+  username: string;
+
+  @IsOptional()
+  @IsString()
+  @IsPhoneNumber()
+  phone: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEmail()
+  email: string;
 }

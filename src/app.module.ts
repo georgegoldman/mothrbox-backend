@@ -9,6 +9,8 @@ import { WalletModule } from './wallet/wallet.module';
 import { UserModule } from './users/users.module';
 import { KeysModule } from './keys/key.module';
 import { HttpModule } from '@nestjs/axios';
+import { EncryptionModule } from './encryption/encryption.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { HttpModule } from '@nestjs/axios';
     AuthModule,
     WalletModule,
     KeysModule,
+    EncryptionModule,
+    StorageModule,
+    EncryptionModule,
     MongooseModule.forRoot(DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([
       {
