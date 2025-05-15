@@ -122,9 +122,19 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: Types.ObjectId): Promise<UserDocument> {
-    const user = await this.userModel.findOneAndDelete({ _id: id });
-    if (user == null) throw new NotFoundError('user not found');
+  async remove(id: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      id,
+      {
+        isDeleted: true,
+      },
+      { new: true },
+    );
+
+    if (!user) {
+      throw new NotFoundError(`delete attempt failed for user ${id}`);
+    }
+
     return user;
   }
 

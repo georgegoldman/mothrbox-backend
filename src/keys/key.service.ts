@@ -12,7 +12,6 @@ import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { getFullnodeUrl } from '@mysten/sui.js/client';
 
 interface GenerateKeyPairRequest {
   user: string;
@@ -35,7 +34,7 @@ export class KeyService {
     request: GenerateKeyPairRequest,
   ): Promise<KeyPairResponse> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/generate-keypairs`,
         request,
         {
@@ -64,7 +63,7 @@ export class KeyService {
 
   async issueToken(payload: KeyPairDTO): Promise<string> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/issue-token`,
         payload,
         {
