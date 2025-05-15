@@ -12,6 +12,7 @@ import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+
 // import { fromHex } from '@mysten/sui/utils';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import { WalrusClient } from '@mysten/walrus';
@@ -39,7 +40,7 @@ export class KeyService {
     request: GenerateKeyPairRequest,
   ): Promise<KeyPairResponse> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/generate-keypairs`,
         request,
         {
@@ -68,7 +69,7 @@ export class KeyService {
 
   async issueToken(payload: KeyPairDTO): Promise<string> {
     try {
-      const response = await axios.post(
+      const response = await this.httpService.axiosRef.post(
         `${MOTHRBOX_BASE_URL}/issue-token`,
         payload,
         {
@@ -144,6 +145,28 @@ export class KeyService {
         },
       });
 
+      // const suiClient = new SuiClient({
+      //   url: getFullnodeUrl('testnet'),
+      // });
+      // const walrusClient = new WalrusClient({
+      //   network: 'testnet',
+      //   suiClient,
+      //   packageConfig: {
+      //     systemObjectId:
+      //       '0x98ebc47370603fe81d9e15491b2f1443d619d1dab720d586e429ed233e1255c1',
+      //     stakingPoolId:
+      //       '0x20266a17b4f1a216727f3eef5772f8d486a9e3b5e319af80a5b75809c035561d',
+      //   },
+      //   storageNodeClientOptions: {
+      //     fetch: (url, options) => {
+      //       console.log('fetching', url);
+      //       return fetch(url, options);
+      //     },
+      //     timeout: 60_000,
+      //   },
+      // });
+      // const file = new TextEncoder().encode('Hello from mothrbox!\n');
+
       const keypair = Ed25519Keypair.fromSecretKey(SECRIT);
       const file = new TextEncoder().encode(
         'Hi from the Mothrbox Backend!!!\n',
@@ -161,8 +184,16 @@ export class KeyService {
       // console.log('this is the write blob');
       // console.log(blobId);
       // return blobId;
+
+      const publicKey = keypair.getPublicKey();
+      const message = new TextEncoder().encode('Hello from Mothrbox');
+
+      const { signature } = await keypair.signPersonalMessage(message);
+      const isValid = await publicKey.verifyPersonalMessage(message, signature);
+      return { isValid };
     } catch (error) {
-      console.log(error);
+      console.log('Error in testWalrus:', error);
+      // return { success: false, error: error.message };
     }
   }
 }

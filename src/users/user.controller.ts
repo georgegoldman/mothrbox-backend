@@ -6,11 +6,13 @@
 import {
   All,
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
+  Patch,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -18,6 +20,7 @@ import { AllowAny, LoggedInUserDecorator } from 'src/auth/auth.decorator';
 import { NotFoundError } from 'rxjs';
 import { FilterQuery, Types } from 'mongoose';
 import { User, UserDocument } from './user.shemas';
+import { UpdateProfileDto } from 'src/common/dtos';
 
 interface GetUserQuey {
   email?: string;
@@ -45,17 +48,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  async deleteUser(@Param() id: string) {
-    try {
-      const userId = new Types.ObjectId(id);
-      (await this.userService.remove(userId)) as any;
-      return { message: 'User successfully deleted' };
-      // Probably send an email informing the user that he/she has been deleted...
-    } catch (error) {
-      if (error instanceof NotFoundError)
-        throw new NotFoundException(error.message, error.name);
-      throw new BadRequestException(error.message);
-    }
+  async deleteUser(@Param() _id: string) {
+    return await this.userService.remove(_id);
   }
 
   @AllowAny()
@@ -81,5 +75,13 @@ export class UserController {
   @Get('/')
   async getCurrentUser(@LoggedInUserDecorator() user: UserDocument) {
     return await this.userService.findOne(user._id);
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @Body() payload: UpdateProfileDto,
+    @LoggedInUserDecorator() user: UserDocument,
+  ) {
+    return await this.userService.updateProfile(user._id.toString(), payload);
   }
 }

@@ -7,6 +7,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import multipart from '@fastify/multipart';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -78,7 +79,8 @@ async function bootstrap() {
   // enable CORS using NestJS's method
   app.enableCors({
     origin: ['http://localhost:3000', 'https://mothrbox.vercel.app'],
-    methods: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 
@@ -99,6 +101,7 @@ async function bootstrap() {
     await app.register(fastifyCookie, {
       secret: COOKIE_SECRET,
     });
+    await app.register(multipart);
   } catch (err) {
     logger.error(`Failed to register Fastify plugins: ${err.message}`);
   }
