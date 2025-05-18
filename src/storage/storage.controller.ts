@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
-import { UploadFileDto } from '../common/dtos';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { LoggedInUserDecorator } from 'src/auth/auth.decorator';
+import { UploadFileDto } from 'src/common/dtos';
 import { UserDocument } from 'src/users/user.shemas';
+import { LoggedInUserDecorator } from '../auth/auth.decorator';
 import { FastifyRequest } from 'fastify';
+import { NotFoundError } from 'src/config/utils/src/util.errors';
 
 @Controller('files')
 export class StorageController {
@@ -11,20 +12,23 @@ export class StorageController {
 
   @Post('upload')
   async handleFileUpload(
-    @Req() req: FastifyRequest,
     @LoggedInUserDecorator() user: UserDocument,
+    @Req() req: FastifyRequest,
     @Body() payload: UploadFileDto,
-  ) {
-    if (!req.files) {
-      return { message: 'Multipart not configured correctly.' };
+  ): Promise<any> {
+    try {
+      const parts = (req as any).parts?.();
+      if (!parts) throw new NotFoundError('No files provided');
+
+      return this.storageService.uploadFile(user, parts, payload);
+    } catch (error) {
+      console.error('File upload error details:', error);
+      return {
+        success: false,
+        message: 'Error processing file upload',
+        error: error.message,
+      };
     }
-
-    return this.storageService.uploadFile(req.files(), user, payload);
-  }
-
-  @Get(':fileId')
-  async getFileById(@Param('fileId') fileId: string) {
-    return await this.storageService.getFileById(fileId);
   }
 
   @Post()

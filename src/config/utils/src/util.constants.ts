@@ -34,3 +34,7 @@ export const MOTHRBOX_BASE_URL = process.env.MOTHRBOX_BASE_URL as string;
 
 // sui
 export const SECRIT = process.env.SECRIT as string;
+export const CLOUDINARY_NAME = process.env.CLOUDINARY_NAME as string;
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY as string;
+export const CLOUDINARY_API_SECRET = process.env
+  .CLOUDINARY_API_SECRET as string;

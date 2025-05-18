@@ -6,68 +6,78 @@ import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
 import { UserDocument } from 'src/users/user.shemas';
 import { UploadFileDto } from 'src/common/dtos';
 import { MultipartFile } from '@fastify/multipart';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Storage, StorageDocument } from 'src/storage/storage.schema';
+import { NotFoundError } from 'src/config/utils/src/util.errors';
+import { CloudinaryUtil } from 'src/config/utils/src/util.cloudinary';
+import { Readable } from 'stream';
 
 @Injectable()
 export class StorageService {
   constructor(
-    @InjectModel(Storage.name)
-    private storageModel: Model<StorageDocument>,
     private readonly encryptionService: EncryptionService,
     private readonly httpService: HttpService,
   ) {}
 
   async uploadFile(
+    user: UserDocument,
     files: AsyncIterableIterator<MultipartFile>,
-    user: UserDocument | undefined,
     payload: UploadFileDto,
   ) {
-    for await (const file of files) {
-      if (file.type === 'file') {
-        const buffer = await file.toBuffer();
-
-        const savedFile = await this.storageModel.create({
-          filename: file.filename,
-          content: buffer,
-          mimetype: file.mimetype,
-          size: buffer.length,
-          metadata: {
-            mimetype: file.mimetype,
-            size: buffer.length,
-          },
-          user: user?._id || null,
-          ephemeralPublicKey: payload.recipientPublicKey || null,
-        });
-
-        return {
-          message: 'File uploaded successfully',
-          filename: savedFile.filename,
-          mimetype: savedFile.metadata.mimetype,
-          size: savedFile.metadata.size,
-          fileId: savedFile._id,
-          ephemeralPublicKey: payload.recipientPublicKey,
-        };
-      }
-    }
-
-    return { message: 'No file found in upload.' };
-  }
-
-  async getFileById(fileId: string): Promise<StorageDocument> {
     try {
-      const file = await this.storageModel.findById(fileId);
-      if (!file) {
-        throw new Error('File not found');
+      for await (const file of files) {
+        if (file.type === 'file') {
+          const buffer = await file.toBuffer();
+
+          // Create a readable stream from the buffer
+          const readableStream = new Readable();
+          readableStream.push(buffer);
+          readableStream.push(null);
+
+          const multerFile: {
+            buffer: Buffer;
+            stream: Readable;
+            mimetype: string;
+            originalname: string;
+            size: number;
+            fieldname: string;
+            encoding: string;
+            destination: string;
+            filename: string;
+            path: string;
+          } = {
+            buffer,
+            stream: readableStream,
+            mimetype: file.mimetype,
+            originalname: file.filename,
+            size: buffer.length,
+            fieldname: file.fieldname,
+            encoding: file.encoding,
+            destination: '',
+            filename: file.filename,
+            path: '',
+          };
+
+          const result = await CloudinaryUtil.uploadFile(multerFile);
+
+          return {
+            message: 'File uploaded successfully',
+            public_id: result.public_id,
+            url: result.url,
+            format: result.format,
+            signature: result.signature,
+            resource_type: result.resource_type,
+            etag: result.etag,
+            created_at: result.created_at,
+            userId: user._id,
+            ephemeralPublicKey: payload.recipientPublicKey,
+          };
+        }
       }
-      return file;
+      throw new NotFoundError('No file found in upload');
     } catch (error) {
-      console.error('Error retrieving file:', error);
-      throw new Error(`Failed to retrieve file: ${error}`);
+      console.error('Error in uploadFile service:', error);
+      throw error;
     }
   }
-
   async handleFileUpload(user: UserDocument, payload: UploadFileDto) {
     const fileId = uuidv4();
     const encrypted = await this.encryptionService.encryptFile(user, payload);
