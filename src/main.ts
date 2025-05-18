@@ -69,6 +69,18 @@ async function bootstrap() {
       }
     },
   });
+
+  fastifyAdapter.register(multipart, {
+    limits: {
+      fieldNameSize: 100,
+      fieldSize: 100,
+      fields: 10,
+      fileSize: 10 * 1024 * 1024,
+      files: 1,
+      headerPairs: 2000,
+    },
+  });
+
   // Create application with better logging
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -101,7 +113,6 @@ async function bootstrap() {
     await app.register(fastifyCookie, {
       secret: COOKIE_SECRET,
     });
-    await app.register(multipart);
   } catch (err) {
     logger.error(`Failed to register Fastify plugins: ${err.message}`);
   }
