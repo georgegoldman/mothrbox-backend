@@ -38,3 +38,32 @@ export const CLOUDINARY_NAME = process.env.CLOUDINARY_NAME as string;
 export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY as string;
 export const CLOUDINARY_API_SECRET = process.env
   .CLOUDINARY_API_SECRET as string;
+
+// otp constant
+export const OTP_EXPIRATION_TIME_IN_SECONDS = 600;
+export const OTP_EXPIRATION_TIME_IN_WORDS = '10 minutes';
+
+// email constant
+export const EMAIL_CONSTANT = {
+  appName: 'Mothrbox',
+};
+
+// queue constant
+export const QUEUE_CONSTANT = {
+  EMAIL: {
+    name: 'email',
+    processors: {},
+  },
+};
+
+// smtp
+export const SMTP_PORT = process.env.SMTP_PORT as string;
+export const SMTP_HOST = process.env.SMTP_HOST as string;
+export const SMTP_PASSWORD = process.env.SMTP_PASSWORD as string;
+export const SMTP_USER = process.env.SMTP_USER as string;
+export const SMTP_EMAIL = process.env.SMTP_EMAIL as string;
+
+// twillo
+export const TWILLO_ACCOUNT_ID = process.env.TWILLO_ACCOUNT_ID as string;
+export const TWILLO_AUTH_TOKEN = process.env.TWILLO_AUTH_TOKEN as string;
+export const TWILLO_FROM_NUMBER = process.env.TWILLO_FROM_NUMBER as string;

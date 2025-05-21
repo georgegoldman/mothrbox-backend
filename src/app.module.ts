@@ -11,6 +11,8 @@ import { KeysModule } from './keys/key.module';
 import { HttpModule } from '@nestjs/axios';
 import { EncryptionModule } from './encryption/encryption.module';
 import { StorageModule } from './storage/storage.module';
+import { MailModule } from './mail/mail.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { StorageModule } from './storage/storage.module';
     EncryptionModule,
     StorageModule,
     EncryptionModule,
+    OtpModule,
+    MailModule,
     MongooseModule.forRoot(DB_CONNECTION_STRING),
     ThrottlerModule.forRoot([
       {

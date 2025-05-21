@@ -7,6 +7,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { JWT_SECRET } from 'src/config/utils/src/util.constants';
 import { UserModule } from 'src/users/users.module';
+import { OtpModule } from 'src/otp/otp.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { UserModule } from 'src/users/users.module';
       global: true,
     },
     UserModule,
+    OtpModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [
