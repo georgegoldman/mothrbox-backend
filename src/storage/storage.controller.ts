@@ -30,12 +30,4 @@ export class StorageController {
       };
     }
   }
-
-  @Post()
-  async uploadFile(
-    @LoggedInUserDecorator() user: UserDocument,
-    @Body() payload: UploadFileDto,
-  ) {
-    return await this.storageService.handleFileUpload(user, payload);
-  }
 }

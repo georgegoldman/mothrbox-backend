@@ -67,3 +67,7 @@ export const SMTP_EMAIL = process.env.SMTP_EMAIL as string;
 export const TWILLO_ACCOUNT_ID = process.env.TWILLO_ACCOUNT_ID as string;
 export const TWILLO_AUTH_TOKEN = process.env.TWILLO_AUTH_TOKEN as string;
 export const TWILLO_FROM_NUMBER = process.env.TWILLO_FROM_NUMBER as string;
+
+export const SMART_CONTRACT_API = process.env.SMART_CONTRACT_API as string;
+
+export const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS as string;

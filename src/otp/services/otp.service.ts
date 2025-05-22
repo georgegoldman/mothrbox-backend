@@ -30,24 +30,6 @@ export class OtpService {
     @Inject(forwardRef(() => UserService)) private userService: UserService,
   ) {}
 
-  // async requestOTP(payload: IRequestOtp) {
-  //   const { email, phone, type } = payload;
-
-  //   const code = BaseHelper.generateOTP();
-  //   const template = VerifyPhoneTemplate({ code });
-  //   await this.createOTP({ email, phone, code, type });
-
-  //   payload.code = code;
-
-  //   if (email) {
-  //     await this.otpMailService.sendOtpMail(payload);
-  //   }
-
-  //   if (phone) {
-  //     await TwilioSms(phone, template);
-  //   }
-  // }
-
   async createOTP(payload: CreateOtpDto): Promise<OTPDocument> {
     return this.otpModel.findOneAndUpdate(
       {
@@ -61,10 +43,6 @@ export class OtpService {
     );
   }
 
-  /**
-   * Verifies the OTP code and optionally removes it from the database
-   * otp can be verified without being removed just to check it is valid or not
-   */
   async verifyOTP(
     payload: VerifyOtpDto,
     remove?: boolean,
