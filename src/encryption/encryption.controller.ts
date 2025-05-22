@@ -1,23 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { UploadFileDto } from 'src/common/dtos';
+import { Controller, Param, Post, Req, Res } from '@nestjs/common';
 import { EncryptionService } from './encryption.service';
-import { LoggedInUserDecorator } from 'src/auth/auth.decorator';
-import { UserDocument } from 'src/users/user.shemas';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 @Controller('encrypt')
 export class EncryptionController {
   constructor(private encryptionService: EncryptionService) {}
 
-  @Post()
-  async encryptFile(
-    @LoggedInUserDecorator() user: UserDocument,
-    @Body() payload: UploadFileDto,
+  @Post(':_id')
+  async encrypt(
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+    @Param('_id') _id: string,
   ) {
-    return this.encryptionService.encryptFile(user, payload);
-  }
-
-  @Get(':fileId')
-  async getEncryptedFileById(@Param('fileId') fileId: string) {
-    return this.encryptionService.getEncryptedFileById(fileId);
+    return await this.encryptionService.encrypt(req, reply, _id);
   }
 }
