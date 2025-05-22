@@ -39,24 +39,38 @@ export class EncryptionService {
             },
           );
 
-          reply
-            .header(
-              'Content-Type',
-              response.headers['content-type'] || 'application/octet-stream',
-            )
-            .header(
-              'Content-Disposition',
-              response.headers['content-disposition'] ||
-                `attachment; filename="${part.filename}.enc"`,
-            );
+          const encryptedChunks: Buffer[] = [];
+          for await (const chunk of response.data) {
+            encryptedChunks.push(chunk);
+          }
 
-          return response.data.pipe(reply.raw);
+          const encryptedBuffer = Buffer.concat(encryptedChunks);
+          const base64Data = encryptedBuffer.toString('base64');
+
+          const fileName = `${part.filename}.enc`;
+
+          return reply.status(200).send({
+            message: "File Uploaded Successfully",
+            filename: fileName,
+            encryptionType: 'AES-256',
+            date: new Date().toISOString(),
+            status: 'SUCCESSFUL',
+            encryptedData: base64Data,
+          });
         } catch (error) {
           console.error(
             'Encryption error:',
             error?.response?.data || error.message,
           );
-          throw new InternalServerErrorException('Failed to process file');
+
+          return reply.status(500).send({
+            message: "AN Error Occured While Uploading File",
+            filename: part.filename,
+            encryptionType: null,
+            date: new Date().toISOString(),
+            status: 'CANCELED',
+            downloadUrl: null,
+          });
         }
       }
     }
