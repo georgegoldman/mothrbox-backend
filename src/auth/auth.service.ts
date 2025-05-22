@@ -2,32 +2,59 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import {
   createSignatureMessage,
+  encryptPassword,
   generateSecret,
   verifyPassword,
   verifyWalletSignature,
 } from 'src/config/utils/src/util.encrypt';
-import { CreateUserDto, LoginDto, WalletLoginDto } from 'src/common/dtos';
+import {
+  CreateUserDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RequestVerifyEmailOtpDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+  VerifyPhoneNumberDto,
+  WalletLoginDto,
+} from 'src/common/dtos';
 import { UserService } from 'src/users/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { JWT_SECRET } from 'src/config/utils/src/util.constants';
+import { APP_NAME, JWT_SECRET } from 'src/config/utils/src/util.constants';
 import BaseError, {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
 } from 'src/config/utils/src/util.errors';
+import { OtpService } from 'src/otp/services/otp.service';
+import { OtpTypeEnum } from 'src/common/enums';
+import { welcomeEmailTemplate } from 'src/mail/templates/welcome.email';
+import { UserDocument } from 'src/users/user.shemas';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private otpService: OtpService,
+    private mailService: MailService,
   ) {}
 
   async register(payload: CreateUserDto) {
     const user = await this.userService.createUser(payload);
+
+    // await this.otpService.sendOTP({
+    //   email: user.email,
+    //   type: OtpTypeEnum.VERIFY_EMAIL,
+    // });
 
     return user;
   }
@@ -57,6 +84,10 @@ export class AuthService {
         throw new ValidationError('Incorrect Password');
       }
 
+      // if (!user.emailVerified) {
+      //   throw new ValidationError('kindly verify your email to login');
+      // }
+
       const token = this.jwtService.sign(
         { _id: user._id as string },
         {
@@ -77,6 +108,106 @@ export class AuthService {
         throw new BaseError(error?.message || 'Login failed');
       }
     }
+  }
+
+  async verifyEmail(payload: VerifyEmailDto) {
+    const { code, email } = payload;
+
+    const user = await this.userService.getUserByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('Invalid Email');
+    }
+
+    if (user.emailVerified) {
+      throw new UnprocessableEntityException('Email already verified');
+    }
+
+    await this.otpService.verifyOTP(
+      {
+        code,
+        email,
+        type: OtpTypeEnum.VERIFY_EMAIL,
+      },
+      true,
+    );
+
+    await this.userService.updateQuery(
+      { email },
+      {
+        emailVerified: true,
+      },
+    );
+
+    const welcomeEmailName = user?.username || 'User';
+    await this.mailService.sendEmail(
+      user.email,
+      `Welcome To ${APP_NAME}`,
+      welcomeEmailTemplate({
+        name: welcomeEmailName,
+      }),
+    );
+  }
+
+  async verifyPhoneNumber(user: UserDocument, payload: VerifyPhoneNumberDto) {
+    const { phone, code } = payload;
+
+    if (user.phoneNumberVerified) {
+      throw new UnprocessableEntityException('Phone number already verified');
+    }
+
+    await this.otpService.verifyOTP(
+      {
+        code,
+        type: OtpTypeEnum.VERIFY_PHONE,
+      },
+      true,
+    );
+
+    await this.userService.updateQuery(
+      { phone },
+      {
+        phoneNumberVerified: true,
+      },
+    );
+  }
+
+  async sendVerificationMail(payload: RequestVerifyEmailOtpDto) {
+    await this.userService.checkUserExistByEmail(payload.email);
+
+    await this.otpService.sendOTP({
+      ...payload,
+      type: OtpTypeEnum.VERIFY_EMAIL,
+    });
+  }
+
+  async sendPasswordResetEmail(payload: ForgotPasswordDto) {
+    await this.userService.checkUserExistByEmail(payload.email);
+
+    await this.otpService.sendOTP({
+      ...payload,
+      type: OtpTypeEnum.RESET_PASSWORD,
+    });
+  }
+
+  async resetPassword(payload: ResetPasswordDto) {
+    const { email, password, confirmPassword, code } = payload;
+
+    if (password !== confirmPassword) {
+      throw new ConflictException('Passwords do not match');
+    }
+
+    await this.otpService.verifyOTP(
+      {
+        email,
+        code,
+        type: OtpTypeEnum.RESET_PASSWORD,
+      },
+      true,
+    );
+
+    const hashedPassword = encryptPassword(password);
+    await this.userService.updateQuery({ email }, { password: hashedPassword });
   }
 
   generateWalletAuthNonce(walletAddress: string) {

@@ -29,6 +29,12 @@ export class User {
 
   @Prop({ enum: KeyEnum, default: null })
   keys: KeyEnum;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop({ default: false })
+  phoneNumberVerified: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

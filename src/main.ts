@@ -75,7 +75,7 @@ async function bootstrap() {
       fieldNameSize: 100,
       fieldSize: 100,
       fields: 10,
-      fileSize: 10 * 1024 * 1024,
+      fileSize: 500 * 1024 * 1024,
       files: 1,
       headerPairs: 2000,
     },
@@ -90,7 +90,11 @@ async function bootstrap() {
 
   // enable CORS using NestJS's method
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://mothrbox.vercel.app'],
+    origin: [
+      'http://localhost:3000',
+      'https://mothrbox.vercel.app',
+      'https://www.mothrbox.xyz',
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

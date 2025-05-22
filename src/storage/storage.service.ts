@@ -78,26 +78,4 @@ export class StorageService {
       throw error;
     }
   }
-  async handleFileUpload(user: UserDocument, payload: UploadFileDto) {
-    const fileId = uuidv4();
-    const encrypted = await this.encryptionService.encryptFile(user, payload);
-
-    const storageUrl = await this.httpService.axiosRef.post(
-      `${MOTHRBOX_BASE_URL}/${fileId}`,
-      { data: encrypted.encryptedData },
-    );
-
-    const metadata = {
-      ...payload.metadata,
-      fileId,
-      userId: user._id,
-      ephemeralPublicKey: encrypted.ephemeralPublicKey,
-      timestamp: new Date().toISOString(),
-    };
-
-    return {
-      ...metadata,
-      storageUrl,
-    };
-  }
 }
