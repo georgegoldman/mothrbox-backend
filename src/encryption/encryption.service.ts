@@ -1,76 +1,80 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { UploadFileDto, EncryptedResponseDto } from '../common/dtos';
-import { decode } from '@msgpack/msgpack';
-import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
-import axios from 'axios';
-import { UserDocument } from 'src/users/user.shemas';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import * as FormData from 'form-data';
 
 @Injectable()
 export class EncryptionService {
   constructor(private readonly httpService: HttpService) {}
 
-  async encryptFile(
-    user: UserDocument,
-    payload: UploadFileDto,
-  ): Promise<EncryptedResponseDto> {
-    try {
-      const response = await this.httpService.axiosRef.post(
-        `${MOTHRBOX_BASE_URL}/encrypt_file}`,
-        {
-          userId: user._id,
-          ...payload,
-        },
-        {
-          responseType: 'arraybuffer',
-          headers: {
-            Accept: 'application/msgpack',
-          },
-        },
-      );
-      const decoded = decode(
-        new Uint8Array(response.data),
-      ) as EncryptedResponseDto;
-
-      return decoded;
-    } catch (error: unknown) {
-      console.error('Encryption error details:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error response:', error.response?.data);
-        throw new Error(`Encryption failed: ${error.message}`);
-      }
-      if (error instanceof Error) {
-        throw new Error(`Encryption failed: ${error.message}`);
-      }
-      throw new Error();
+  async encrypt(req: FastifyRequest, reply: FastifyReply, _id: string) {
+    const parts = (req as any).parts?.();
+    if (!parts) {
+      return reply.status(400).send({ message: 'No files provided' });
     }
-  }
 
-  async getEncryptedFileById(fileId: string): Promise<EncryptedResponseDto> {
-    try {
-      const response = await this.httpService.axiosRef.get(
-        `${MOTHRBOX_BASE_URL}/encrypt_file/${fileId}`,
-        {
-          responseType: 'arraybuffer',
-          headers: {
-            Accept: 'application/msgpack',
-          },
-        },
-      );
+    for await (const part of parts) {
+      if (part.file) {
+        const chunks: Buffer[] = [];
 
-      const decoded = decode(
-        new Uint8Array(response.data),
-      ) as EncryptedResponseDto;
+        for await (const chunk of part.file) {
+          chunks.push(chunk);
+        }
 
-      return decoded;
-    } catch (error: unknown) {
-      console.error('Fetching encrypted file failed:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error response:', error.response?.data);
-        throw new Error(`Fetch failed: ${error.message}`);
+        const fileBuffer = Buffer.concat(chunks);
+
+        const formData = new FormData();
+        formData.append('file', fileBuffer, part.filename);
+
+        try {
+          const response = await this.httpService.axiosRef.post(
+            `${process.env.MOTHRBOX_BASE_URL}/encrypt_file/${_id}`,
+            formData,
+            {
+              responseType: 'stream',
+              headers: {
+                Accept: 'application/msgpack',
+                ...formData.getHeaders(),
+              },
+            },
+          );
+
+          const encryptedChunks: Buffer[] = [];
+          for await (const chunk of response.data) {
+            encryptedChunks.push(chunk);
+          }
+
+          const encryptedBuffer = Buffer.concat(encryptedChunks);
+          const base64Data = encryptedBuffer.toString('base64');
+
+          const fileName = `${part.filename}.enc`;
+
+          return reply.status(200).send({
+            message: "File Uploaded Successfully",
+            filename: fileName,
+            encryptionType: 'AES-256',
+            date: new Date().toISOString(),
+            status: 'SUCCESSFUL',
+            encryptedData: base64Data,
+          });
+        } catch (error) {
+          console.error(
+            'Encryption error:',
+            error?.response?.data || error.message,
+          );
+
+          return reply.status(500).send({
+            message: "AN Error Occured While Uploading File",
+            filename: part.filename,
+            encryptionType: null,
+            date: new Date().toISOString(),
+            status: 'CANCELED',
+            downloadUrl: null,
+          });
+        }
       }
-      throw new Error('Unknown error fetching encrypted file');
     }
+
+    return reply.status(400).send({ message: 'No file uploaded' });
   }
 }

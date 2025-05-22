@@ -93,6 +93,10 @@ export function verifyWalletSignature(
     return false;
   }
 }
+
+export function generateOTP(): number {
+  return Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+}
 export default {
   encryptPassword,
   verifyPassword,
@@ -102,4 +106,5 @@ export default {
   generateWallet,
   createSignatureMessage,
   verifyWalletSignature,
+  generateOTP,
 };

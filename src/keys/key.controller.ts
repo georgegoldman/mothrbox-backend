@@ -34,8 +34,8 @@ export class KeyController {
     return this.keyService.getAllKeypairs();
   }
 
-  @Get('walrus')
-  async confirm() {
-    return this.keyService.testWalrus();
-  }
+  // @Get('walrus')
+  // async confirm() {
+  //   return this.keyService.testWalrus();
+  // }
 }

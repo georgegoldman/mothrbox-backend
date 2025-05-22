@@ -6,7 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.shemas';
-import { FilterQuery, Model, SortOrder, Types } from 'mongoose';
+import {
+  ClientSession,
+  FilterQuery,
+  Model,
+  SortOrder,
+  Types,
+  UpdateQuery,
+} from 'mongoose';
 import { encryptPassword } from 'src/config/utils/src/util.encrypt';
 import {
   IntegrityError,
@@ -193,5 +200,56 @@ export class UserService {
         new: true,
       },
     );
+  }
+
+  async getUserByEmail(
+    email: string,
+    populateFields?: string | string[],
+  ): Promise<UserDocument> {
+    const user = await this.userModel
+      .findOne({ email })
+      .populate(populateFields || []);
+    if (!user) throw new NotFoundError('User not found');
+    return user;
+  }
+
+  async updateQuery(
+    query: FilterQuery<User>,
+    update: UpdateQuery<User>,
+    session?: ClientSession,
+  ) {
+    return await this.userModel.updateOne(query, update, {
+      session,
+      new: true,
+    });
+  }
+
+  async findOneQuery({
+    options,
+    showDeleted = false,
+    session,
+  }: {
+    options: FilterQuery<User>;
+    showDeleted?: boolean;
+    session?: ClientSession;
+  }): Promise<User | null> {
+    return await this.userModel
+      .findOne({
+        ...options,
+        isDeleted: showDeleted
+          ? { $in: [showDeleted, false, undefined] }
+          : { $in: [false, undefined] },
+      })
+      .session(session || null);
+  }
+
+  async checkUserExistByEmail(email: string): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
+
+    if (!user) {
+      throw new NotFoundError('No user exist with provided email');
+    }
+
+    return true;
   }
 }
