@@ -47,7 +47,7 @@ export class FileUploadService {
         targetUrl,
         formData,
         {
-          responseType: 'arraybuffer', 
+          responseType: 'arraybuffer',
           headers: {
             Accept: 'application/msgpack',
             ...formData.getHeaders(),
@@ -140,8 +140,7 @@ export class FileUploadService {
         .header(
           'Content-Disposition',
           `attachment; filename="${decryptedFilename}"`,
-      );
-      
+        );
 
       return reply.send(decryptedBuffer);
     } catch (error) {
@@ -150,31 +149,31 @@ export class FileUploadService {
     }
   }
 
-  async getUserEncryptedFiles(
-    userId: string,
-    query: PaginatedQuery,
-  ): Promise<PaginatedDoc<EncryptedFileMetaData>> {
-    try {
-      // Use the pagination utility with user filter
-      const result = await paginate(this.encryptedFileMetadataModel, query, {
-        page: query.page || 1,
-        limit: query.limit || 10,
-        sortField: query.sortField,
-        sortOrder: query.sortOrder as 'asc' | 'desc' | undefined,
-        fiterQuery: {
-          userId,
-        },
-      });
+  // async getUserEncryptedFiles(
+  //   userId: string,
+  //   query: PaginatedQuery,
+  // ): Promise<PaginatedDoc<EncryptedFileMetaData>> {
+  //   try {
+  //     // Use the pagination utility with user filter
+  //     const result = await paginate(this.encryptedFileMetadataModel, query, {
+  //       page: query.page || 1,
+  //       limit: query.limit || 10,
+  //       sortField: query.sortField,
+  //       sortOrder: query.sortOrder as 'asc' | 'desc' | undefined,
+  //       fiterQuery: {
+  //         userId,
+  //       },
+  //     });
 
-      return result;
-    } catch (error) {
-      console.error('Error fetching user encrypted files:', error);
+  //     return result;
+  //   } catch (error) {
+  //     console.error('Error fetching user encrypted files:', error);
 
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
+  //     if (error instanceof BadRequestException) {
+  //       throw error;
+  //     }
 
-      throw new InternalServerErrorException('Failed to fetch encrypted files');
-    }
-  }
+  //     throw new InternalServerErrorException('Failed to fetch encrypted files');
+  //   }
+  // }
 }
