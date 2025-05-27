@@ -7,6 +7,7 @@ import {
   FileUploadMetaData,
   FileUploadMetaDataSchema,
 } from './file-upload.schema';
+import { MothrboxService } from 'src/common/service/mothrbox.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import {
     ]),
   ],
   controllers: [FileUploadController],
-  providers: [FileUploadService],
+  providers: [FileUploadService, MothrboxService],
   exports: [FileUploadService],
 })
 export class FileUploadModule {}
