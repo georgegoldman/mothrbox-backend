@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { KeyEnum } from 'src/common/enums';
-import { User } from 'src/users/user.shemas';
+import { User } from 'src/users/user.schema';
 import { string } from 'zod';
 
 export type KeyDocument = HydratedDocument<Key>;

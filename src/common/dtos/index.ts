@@ -21,6 +21,16 @@ export class EncryptedResponseDto {
   ephemeralPublicKey: string;
 }
 
+export class DecryptFileDto {
+  @IsString()
+  @IsNotEmpty()
+  encryptedData: string;
+
+  @IsString()
+  @IsNotEmpty()
+  fileId: string;
+}
+
 export class WalletLoginDto {
   @IsNotEmpty({ message: 'Wallet address is required' })
   walletAddress: string;

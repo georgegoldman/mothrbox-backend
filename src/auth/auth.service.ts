@@ -36,7 +36,7 @@ import BaseError, {
 import { OtpService } from 'src/otp/services/otp.service';
 import { OtpTypeEnum } from 'src/common/enums';
 import { welcomeEmailTemplate } from 'src/mail/templates/welcome.email';
-import { UserDocument } from 'src/users/user.shemas';
+import { UserDocument } from 'src/users/user.schema';
 import { MailService } from 'src/mail/mail.service';
 
 @Injectable()

@@ -14,12 +14,7 @@ import {
 } from 'src/config/utils/src/util.errors';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { config } from 'dotenv';
-import {
-  CONTRACT_ADDRESS,
-  JWT_SECRET,
-  SMART_CONTRACT_API,
-} from 'src/config/utils/src/util.constants';
-import { ethers } from 'ethers';
+import { JWT_SECRET } from 'src/config/utils/src/util.constants';
 config();
 
 @Injectable()
@@ -41,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     let isError = false;
 
     try {
-      const { _id, publicKey } = payload;
+      const { _id } = payload;
 
       if (!_id) {
         throw new UnauthorizedException('Invalid token payload');
@@ -62,25 +57,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (isError) {
         throw new UnauthorizedError(errorMessage, HttpStatus.UNAUTHORIZED);
       }
-
-      // === NFT Ownership Validation ===
-      // if (!publicKey) {
-      //   throw new UnauthorizedException(
-      //     'No public key found in token for NFT validation',
-      //   );
-      // }
-
-      // const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-      // const contract = new ethers.Contract(
-      //   CONTRACT_ADDRESS,
-      //   SMART_CONTRACT_API,
-      //   provider,
-      // );
-
-      // const isOwner = await contract.isValidAccessKey(publicKey);
-      // if (!isOwner) {
-      //   throw new UnauthorizedException('User does not own required NFT');
-      // }
 
       return user;
     } catch (error) {

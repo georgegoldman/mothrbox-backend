@@ -7,7 +7,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import multipart from '@fastify/multipart';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -20,6 +19,7 @@ import fastifyCsrf from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import * as qs from 'qs';
 import { COOKIE_SECRET, PORT } from 'src/config/utils/src/util.constants';
+import multipart from '@fastify/multipart';
 
 async function bootstrap() {
   // configure comprehensive winston logging
@@ -34,17 +34,17 @@ async function bootstrap() {
           ),
         ),
       }),
-      new winston.transports.File({
-        filename: 'error.log',
-        level: 'error',
-        format: winston.format.combine(
-          winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-          winston.format.printf(
-            (info) =>
-              `${info.timestamp} ${info.level.toUpperCase()}: ${info.message}`,
-          ),
-        ),
-      }),
+      // new winston.transports.File({
+      //   filename: 'error.log',
+      //   level: 'error',
+      //   format: winston.format.combine(
+      //     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      //     winston.format.printf(
+      //       (info) =>
+      //         `${info.timestamp} ${info.level.toUpperCase()}: ${info.message}`,
+      //     ),
+      //   ),
+      // }),
       new winston.transports.File({
         filename: 'combined.log',
         format: winston.format.combine(
@@ -70,16 +70,16 @@ async function bootstrap() {
     },
   });
 
-  fastifyAdapter.register(multipart, {
-    limits: {
-      fieldNameSize: 100,
-      fieldSize: 100,
-      fields: 10,
-      fileSize: 500 * 1024 * 1024,
-      files: 1,
-      headerPairs: 2000,
-    },
-  });
+  // fastifyAdapter.register(multipart as any, {
+  //   limits: {
+  //     fieldNameSize: 100,
+  //     fieldSize: 100,
+  //     fields: 10,
+  //     fileSize: 500 * 1024 * 1024,
+  //     files: 1,
+  //     headerPairs: 2000,
+  //   },
+  // });
 
   // Create application with better logging
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -87,6 +87,7 @@ async function bootstrap() {
     fastifyAdapter,
     { logger: new ConsoleLogger({ json: false }) },
   );
+  await app.register(multipart as any);
 
   // enable CORS using NestJS's method
   app.enableCors({

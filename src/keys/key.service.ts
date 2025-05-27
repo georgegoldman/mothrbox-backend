@@ -7,27 +7,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Key } from './key.schema';
 import axios from 'axios';
-import { MOTHRBOX_BASE_URL, SECRIT } from 'src/config/utils/src/util.constants';
+import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
 import { KeyPairDTO } from './issue-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-
-// import { fromHex } from '@mysten/sui/utils';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { WalrusClient } from '@mysten/walrus';
-import { Agent, setGlobalDispatcher } from 'undici';
-import PQueue from 'p-queue';
-
-interface GenerateKeyPairRequest {
-  user: string;
-  algorithm: string;
-}
-
-interface KeyPairResponse {
-  status: number;
-  message: string;
-}
+import { GenerateKeyPairRequestDto, KeyPairResponseDto } from './key.dto';
 
 @Injectable()
 export class KeyService {
@@ -37,12 +21,12 @@ export class KeyService {
   ) {}
 
   async generateKeyPair(
-    request: GenerateKeyPairRequest,
-  ): Promise<KeyPairResponse> {
+    payload: GenerateKeyPairRequestDto,
+  ): Promise<KeyPairResponseDto> {
     try {
       const response = await this.httpService.axiosRef.post(
-        `${MOTHRBOX_BASE_URL}/generate-keypairs`,
-        request,
+        `${MOTHRBOX_BASE_URL}/keys`,
+        payload,
         {
           headers: {
             'Content-Type': 'application/json',
