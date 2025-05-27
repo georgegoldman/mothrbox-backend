@@ -1,4 +1,4 @@
-import { UserDocument } from 'src/users/user.shemas';
+import { UserDocument } from 'src/users/user.schema';
 import { OtpTypeEnum } from '../enums';
 
 export interface IWelcomeEmailTemplate {

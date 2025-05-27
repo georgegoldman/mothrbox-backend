@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Delete, Query, Get } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { LoggedInUserDecorator } from 'src/auth/auth.decorator';
-import { UserDocument } from 'src/users/user.shemas';
+import { UserDocument } from 'src/users/user.schema';
 
 @Controller('wallet')
 export class WalletController {

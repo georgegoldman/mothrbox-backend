@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './user.shemas';
+import { User, UserDocument } from './user.schema';
 import {
   ClientSession,
   FilterQuery,

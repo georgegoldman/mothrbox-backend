@@ -19,7 +19,7 @@ import { UserService } from './user.service';
 import { AllowAny, LoggedInUserDecorator } from 'src/auth/auth.decorator';
 import { NotFoundError } from 'rxjs';
 import { FilterQuery, Types } from 'mongoose';
-import { User, UserDocument } from './user.shemas';
+import { User, UserDocument } from './user.schema';
 import { UpdateProfileDto } from 'src/common/dtos';
 
 interface GetUserQuey {

@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { User, UserDocument } from 'src/users/user.shemas';
+import { User, UserDocument } from 'src/users/user.schema';
 
-export type EncryptedFileMetaDataDocument = EncryptedFileMetaData & Document;
+export type FileUploadMetaDataDocument = FileUploadMetaData & Document;
 
 @Schema({ timestamps: true })
-export class EncryptedFileMetaData {
+export class FileUploadMetaData {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
@@ -13,7 +13,7 @@ export class EncryptedFileMetaData {
   userId: UserDocument;
 
   @Prop({ required: true })
-  originalFilename: string;
+  fileName: string;
 
   @Prop({ required: true })
   mimeType: string;
@@ -28,4 +28,5 @@ export class EncryptedFileMetaData {
   status: string;
 }
 
-export const EncryptedFileMetaDataSchema = SchemaFactory.createForClass(EncryptedFileMetaData);
+export const FileUploadMetaDataSchema =
+  SchemaFactory.createForClass(FileUploadMetaData);

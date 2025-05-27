@@ -9,13 +9,13 @@ import * as FormData from 'form-data';
 import { MOTHRBOX_BASE_URL } from 'src/config/utils/src/util.constants';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { EncryptedFileMetaData } from './encryption.schema';
+import { FileUploadMetaData } from './file-upload.schema';
 
 @Injectable()
-export class EncryptionService {
+export class FileUploadService {
   constructor(
-    @InjectModel(EncryptedFileMetaData.name)
-    private readonly encryptedFileMetadataModel: Model<EncryptedFileMetaData>,
+    @InjectModel(FileUploadMetaData.name)
+    private readonly fileUploadMetaDataModel: Model<FileUploadMetaData>,
     private readonly httpService: HttpService,
   ) {}
 
@@ -24,6 +24,7 @@ export class EncryptionService {
     reply: FastifyReply,
     file: Express.Multer.File,
     userId: string,
+    alias: string,
   ) {
     try {
       console.log('Service encrypt method called');
@@ -50,7 +51,7 @@ export class EncryptionService {
         throw new InternalServerErrorException('Service configuration error');
       }
 
-      const targetUrl = `${mothrboxUrl}/encrypt/${userId}/mtx`;
+      const targetUrl = `${mothrboxUrl}/encrypt/${userId}/${alias}`;
       console.log('Sending request to:', targetUrl);
 
       const response = await this.httpService.axiosRef.post(
@@ -67,16 +68,14 @@ export class EncryptionService {
       );
 
       console.log('Response status:', response?.status);
-
+      const encryptedFilename = `${file.originalname}.enc`;
       const encryptedBuffer = Buffer.from(response.data);
-      const metadata = await this.encryptedFileMetadataModel.create({
+      const metadata = await this.fileUploadMetaDataModel.create({
         userId,
-        originalFilename: file.originalname,
+        fileName: encryptedFilename,
         mimeType: file.mimetype,
         fileSize: file.size,
       });
-
-      const encryptedFilename = `${file.originalname}.enc`;
 
       // Set headers for blob download
       reply
@@ -120,6 +119,7 @@ export class EncryptionService {
     reply: FastifyReply,
     file: Express.Multer.File,
     userId: string,
+    alias: string,
   ) {
     try {
       if (!file || !file.originalname.endsWith('.enc')) {
@@ -130,13 +130,13 @@ export class EncryptionService {
 
       const formData = new FormData();
       formData.append('file', file.buffer, file.originalname);
+      const targetUrl = `${MOTHRBOX_BASE_URL}/decrypt/${userId}/${alias}`;
 
-      const targetUrl = `${MOTHRBOX_BASE_URL}/decrypt/${userId}/mtx`;
       const response = await this.httpService.axiosRef.post(
         targetUrl,
         formData,
         {
-          responseType: 'arraybuffer',
+          responseType: 'arraybuffer', 
           headers: {
             Accept: 'application/msgpack',
             ...formData.getHeaders(),
@@ -146,7 +146,6 @@ export class EncryptionService {
       );
 
       const decryptedBuffer = Buffer.from(response.data);
-
       const decryptedFilename = file.originalname.replace(/\.enc$/, '');
 
       reply
