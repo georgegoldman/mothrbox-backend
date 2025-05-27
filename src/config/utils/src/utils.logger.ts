@@ -10,6 +10,7 @@ import {
   ConsoleLogger,
 } from '@nestjs/common';
 import BaseError from './util.errors';
+// import { timestamp } from 'rxjs';
 
 @Catch() // No specific exception type => This will catch all exceptions
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -35,12 +36,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
           ? exception.message
           : 'Internal server error';
 
-    // For Fastify, use send() instead of json()
-    response.status(status).send({
+    const payload = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       message,
-    });
+    };
+
+    // Check whether `response` has `.status()` (Express) or not (Fastify)
+
+    if (typeof response.status === 'function') {
+      response.status(status).json(payload); // express
+    } else {
+      response.code?.(status).send(payload);
+    }
   }
 }

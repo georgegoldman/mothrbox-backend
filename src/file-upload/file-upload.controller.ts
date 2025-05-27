@@ -7,8 +7,9 @@ import {
   UseInterceptors,
   HttpException,
   HttpStatus,
-  BadRequestException,
+  // BadRequestException,
   Body,
+  Param,
 } from '@nestjs/common';
 import { FileUploadService } from './file-upload.service';
 import { FastifyReply, FastifyRequest } from 'fastify';
@@ -18,11 +19,12 @@ import { UserDocument } from 'src/users/user.schema';
 
 @Controller('file-upload')
 export class FileUploadController {
-  constructor(private fileUploadService: FileUploadService) {}
+  constructor(private fileCryptoService: FileUploadService) {}
 
-  @Post('encrypt')
+  @Post('/:operation')
   @UseInterceptors(FileInterceptor('file'))
   async encrypt(
+    @Param('operation') operation: 'encrypt' | 'decrypt',
     @Req() req: FastifyRequest,
     @Res() reply: FastifyReply,
     @UploadedFile() file: Express.Multer.File,
@@ -43,7 +45,8 @@ export class FileUploadController {
         });
       }
 
-      return await this.fileUploadService.encrypt(
+      return await this.fileCryptoService.crypt(
+        operation,
         req,
         reply,
         file,
@@ -53,45 +56,10 @@ export class FileUploadController {
     } catch (error) {
       console.error('Controller error:', error);
       throw new HttpException(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Upload failed: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    }
-  }
-
-  @Post('decrypt')
-  @UseInterceptors(FileInterceptor('file'))
-  async decryptFile(
-    @LoggedInUserDecorator() user: UserDocument,
-    @UploadedFile() file: Express.Multer.File,
-    @Body('alias') alias: string,
-    @Req() req: FastifyRequest,
-    @Res() reply: FastifyReply,
-  ) {
-    try {
-      console.log('Controller decrypt method called');
-      console.log('User ID:', user._id);
-      console.log('File received:', file ? 'Yes' : 'No');
-      console.log('Alias:', alias);
-
-      if (!file) {
-        throw new BadRequestException('No encrypted file uploaded');
-      }
-
-      if (!alias) {
-        throw new BadRequestException('Alias is required for decryption');
-      }
-
-      return await this.fileUploadService.decrypt(
-        req,
-        reply,
-        file,
-        user._id.toString(),
-        alias,
-      );
-    } catch (error) {
-      console.error('Controller decryption error:', error);
-      throw error;
     }
   }
 }

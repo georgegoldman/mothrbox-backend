@@ -21,6 +21,8 @@ import {
 } from 'src/config/utils/src/util.errors';
 import { paginate, PaginatedDoc } from 'src/config/utils/src/util.pagination';
 import { CreateUserDto, UpdateProfileDto } from 'src/common/dtos';
+import { JWT_SECRET } from 'src/config/utils/src/util.constants';
+import { JwtService } from '@nestjs/jwt';
 
 interface UserParams {
   email: string;
@@ -31,6 +33,7 @@ interface UserParams {
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createUser(payload: CreateUserDto): Promise<UserDocument> {
@@ -58,8 +61,19 @@ export class UserService {
         password: hashedPassword,
       });
 
+      const token = this.jwtService.sign(
+        { _id: createdUser._id.toString() },
+        {
+          secret: JWT_SECRET,
+        },
+      );
+
       delete createdUser['_doc'].password;
-      return createdUser;
+
+      return {
+        ...createdUser['_doc'],
+        accessToken: token,
+      } as UserDocument;
     } catch (e) {
       console.error('Error while creating user', e);
       if (e.code === 11000) {
