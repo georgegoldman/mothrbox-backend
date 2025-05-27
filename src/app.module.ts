@@ -13,6 +13,7 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { StorageModule } from './storage/storage.module';
 import { MailModule } from './mail/mail.module';
 import { OtpModule } from './otp/otp.module';
+// import { FastifyMulterModule } from '@nest-lab/fastify-multer';
 
 @Module({
   imports: [
@@ -21,7 +22,6 @@ import { OtpModule } from './otp/otp.module';
     AuthModule,
     WalletModule,
     KeysModule,
-    EncryptionModule,
     StorageModule,
     EncryptionModule,
     OtpModule,
@@ -33,6 +33,7 @@ import { OtpModule } from './otp/otp.module';
         limit: 100,
       },
     ]),
+    // FastifyMulterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

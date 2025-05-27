@@ -129,20 +129,8 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: string) {
-    const user = await this.userModel.findByIdAndUpdate(
-      id,
-      {
-        isDeleted: true,
-      },
-      { new: true },
-    );
-
-    if (!user) {
-      throw new NotFoundError(`delete attempt failed for user ${id}`);
-    }
-
-    return user;
+  async remove(user: UserDocument) {
+    return await this.userModel.findOneAndDelete(user._id);
   }
 
   async getUserDetailsWithPassword(

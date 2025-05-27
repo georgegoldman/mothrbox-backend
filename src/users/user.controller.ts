@@ -47,9 +47,13 @@ export class UserController {
     }
   }
 
-  @Delete(':id')
-  async deleteUser(@Param() _id: string) {
-    return await this.userService.remove(_id);
+  @Delete()
+  async deleteUser(@LoggedInUserDecorator() user: UserDocument) {
+    const result = await this.userService.remove(user);
+    return {
+      message: 'User Deleted Successfully',
+      user: result,
+    };
   }
 
   @AllowAny()
@@ -82,6 +86,13 @@ export class UserController {
     @Body() payload: UpdateProfileDto,
     @LoggedInUserDecorator() user: UserDocument,
   ) {
-    return await this.userService.updateProfile(user._id.toString(), payload);
+    const result = await this.userService.updateProfile(
+      user._id.toString(),
+      payload,
+    );
+    return {
+      message: 'User Deleted Successfully',
+      user: result,
+    };
   }
 }
