@@ -27,9 +27,6 @@ export class User {
   @Prop({ required: false, default: null })
   profilePhoto: string;
 
-  @Prop({ enum: KeyEnum, default: null })
-  keys: KeyEnum;
-
   @Prop({ default: false })
   emailVerified: boolean;
 

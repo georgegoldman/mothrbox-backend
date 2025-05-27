@@ -56,6 +56,11 @@ export class FileUploadController {
     @Res() reply: FastifyReply,
   ) {
     try {
+      console.log('Controller decrypt method called');
+      console.log('User ID:', user._id);
+      console.log('File received:', file ? 'Yes' : 'No');
+      console.log('Alias:', alias);
+
       if (!file) {
         throw new BadRequestException('No encrypted file uploaded');
       }
@@ -72,7 +77,8 @@ export class FileUploadController {
         alias,
       );
     } catch (error) {
-      throw Error('Controller decryption error:', error);
+      console.error('Controller decryption error:', error);
+      throw error;
     }
   }
 }
