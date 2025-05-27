@@ -9,10 +9,10 @@ import { WalletModule } from './wallet/wallet.module';
 import { UserModule } from './users/users.module';
 import { KeysModule } from './keys/key.module';
 import { HttpModule } from '@nestjs/axios';
-import { EncryptionModule } from './encryption/encryption.module';
-import { StorageModule } from './storage/storage.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 import { MailModule } from './mail/mail.module';
 import { OtpModule } from './otp/otp.module';
+// import { FastifyMulterModule } from '@nest-lab/fastify-multer';
 
 @Module({
   imports: [
@@ -21,9 +21,7 @@ import { OtpModule } from './otp/otp.module';
     AuthModule,
     WalletModule,
     KeysModule,
-    EncryptionModule,
-    StorageModule,
-    EncryptionModule,
+    FileUploadModule,
     OtpModule,
     MailModule,
     MongooseModule.forRoot(DB_CONNECTION_STRING),
@@ -33,6 +31,7 @@ import { OtpModule } from './otp/otp.module';
         limit: 100,
       },
     ]),
+    // FastifyMulterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
