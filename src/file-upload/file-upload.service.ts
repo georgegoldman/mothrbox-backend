@@ -27,38 +27,27 @@ export class FileUploadService {
     alias: string,
   ) {
     try {
-      console.log('Service encrypt method called');
-      console.log('File in service:', file ? 'Present' : 'Missing');
-      console.log('UserId:', userId);
-
-      if (!file) {
-        console.error('No file provided to service');
-        return reply.status(400).send({ message: 'No file uploaded' });
+      if (!file?.buffer) {
+        return reply
+          .status(400)
+          .send({ message: 'No file or buffer provided' });
       }
 
-      if (!file.buffer) {
-        console.error('File buffer is missing');
-        return reply.status(400).send({ message: 'File buffer is missing' });
-      }
-
-      console.log('Creating FormData...');
       const formData = new FormData();
       formData.append('file', file.buffer, file.originalname);
 
       const mothrboxUrl = MOTHRBOX_BASE_URL;
       if (!mothrboxUrl) {
-        console.error('MOTHRBOX_BASE_URL environment variable is not set');
         throw new InternalServerErrorException('Service configuration error');
       }
 
       const targetUrl = `${mothrboxUrl}/encrypt/${userId}/${alias}`;
-      console.log('Sending request to:', targetUrl);
 
       const response = await this.httpService.axiosRef.post(
         targetUrl,
         formData,
         {
-          responseType: 'arraybuffer',
+          responseType: 'arraybuffer', 
           headers: {
             Accept: 'application/msgpack',
             ...formData.getHeaders(),
@@ -67,9 +56,9 @@ export class FileUploadService {
         },
       );
 
-      console.log('Response status:', response?.status);
-      const encryptedFilename = `${file.originalname}.enc`;
       const encryptedBuffer = Buffer.from(response.data);
+      const encryptedFilename = `${file.originalname}.enc`;
+
       const metadata = await this.fileUploadMetaDataModel.create({
         userId,
         fileName: encryptedFilename,
@@ -77,14 +66,13 @@ export class FileUploadService {
         fileSize: file.size,
       });
 
-      // Set headers for blob download
       reply
         .header('Content-Type', 'application/octet-stream')
-        .header('Content-Length', encryptedBuffer.length.toString())
         .header(
           'Content-Disposition',
           `attachment; filename="${encryptedFilename}"`,
         )
+        .header('Content-Length', encryptedBuffer.length.toString())
         .header(
           'X-File-Metadata',
           JSON.stringify({
@@ -99,18 +87,13 @@ export class FileUploadService {
 
       return reply.send(encryptedBuffer);
     } catch (error) {
-      console.error('Encryption error details:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
+      console.error('Encryption error:', error);
 
       if (error.response?.status === 404) {
         throw new BadRequestException('Encryption service not found');
       }
 
-      throw new InternalServerErrorException('Failed to process file');
+      throw new InternalServerErrorException('Failed to encrypt file');
     }
   }
 
@@ -136,7 +119,7 @@ export class FileUploadService {
         targetUrl,
         formData,
         {
-          responseType: 'arraybuffer', 
+          responseType: 'arraybuffer',
           headers: {
             Accept: 'application/msgpack',
             ...formData.getHeaders(),
@@ -157,7 +140,8 @@ export class FileUploadService {
         .header(
           'Content-Disposition',
           `attachment; filename="${decryptedFilename}"`,
-        );
+      );
+      
 
       return reply.send(decryptedBuffer);
     } catch (error) {
@@ -166,31 +150,31 @@ export class FileUploadService {
     }
   }
 
-  // async getUserEncryptedFiles(
-  //   userId: string,
-  //   query: PaginatedQuery,
-  // ): Promise<PaginatedDoc<EncryptedFileMetaData>> {
-  //   try {
-  //     // Use the pagination utility with user filter
-  //     const result = await paginate(this.encryptedFileMetadataModel, query, {
-  //       page: query.page || 1,
-  //       limit: query.limit || 10,
-  //       sortField: query.sortField,
-  //       sortOrder: query.sortOrder as 'asc' | 'desc' | undefined,
-  //       fiterQuery: {
-  //         userId,
-  //       },
-  //     });
+  async getUserEncryptedFiles(
+    userId: string,
+    query: PaginatedQuery,
+  ): Promise<PaginatedDoc<EncryptedFileMetaData>> {
+    try {
+      // Use the pagination utility with user filter
+      const result = await paginate(this.encryptedFileMetadataModel, query, {
+        page: query.page || 1,
+        limit: query.limit || 10,
+        sortField: query.sortField,
+        sortOrder: query.sortOrder as 'asc' | 'desc' | undefined,
+        fiterQuery: {
+          userId,
+        },
+      });
 
-  //     return result;
-  //   } catch (error) {
-  //     console.error('Error fetching user encrypted files:', error);
+      return result;
+    } catch (error) {
+      console.error('Error fetching user encrypted files:', error);
 
-  //     if (error instanceof BadRequestException) {
-  //       throw error;
-  //     }
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
 
-  //     throw new InternalServerErrorException('Failed to fetch encrypted files');
-  //   }
-  // }
+      throw new InternalServerErrorException('Failed to fetch encrypted files');
+    }
+  }
 }

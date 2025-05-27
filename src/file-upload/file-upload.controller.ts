@@ -30,19 +30,6 @@ export class FileUploadController {
     @Body('alias') alias: string,
   ): Promise<void> {
     try {
-      console.log('Upload endpoint hit');
-      console.log('Content-Type:', req.headers['content-type']);
-      console.log('Request method:', req.method);
-      console.log('File received:', file ? 'Yes' : 'No');
-
-      if (file) {
-        console.log('File details:', {
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          size: file.size,
-        });
-      }
-
       return await this.fileUploadService.encrypt(
         req,
         reply,
@@ -69,11 +56,6 @@ export class FileUploadController {
     @Res() reply: FastifyReply,
   ) {
     try {
-      console.log('Controller decrypt method called');
-      console.log('User ID:', user._id);
-      console.log('File received:', file ? 'Yes' : 'No');
-      console.log('Alias:', alias);
-
       if (!file) {
         throw new BadRequestException('No encrypted file uploaded');
       }
@@ -90,8 +72,7 @@ export class FileUploadController {
         alias,
       );
     } catch (error) {
-      console.error('Controller decryption error:', error);
-      throw error;
+      throw Error('Controller decryption error:', error);
     }
   }
 }
