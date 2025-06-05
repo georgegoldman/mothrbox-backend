@@ -12,10 +12,11 @@ export class MothrboxService {
     userId: string,
     alias: string,
     buffer: Buffer,
+    blobId?: string,
   ): Promise<Buffer> {
     try {
       const response = await this.httpService.axiosRef.post(
-        `${MOTHRBOX_BASE_URL}/${operation}/${userId}/${alias}`,
+        `${MOTHRBOX_BASE_URL}/${operation}/${userId}/${alias}/${blobId}`,
         buffer,
         {
           headers: {

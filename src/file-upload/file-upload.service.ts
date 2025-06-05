@@ -29,6 +29,8 @@ export class FileUploadService {
     file: Express.Multer.File,
     userId: string,
     alias: string,
+    walletAddress?: string,
+    blobId?: string,
   ) {
     try {
       const cryptedBuffer = await this.mothrboxService.proxyBinaryCall(
@@ -36,6 +38,7 @@ export class FileUploadService {
         userId,
         alias,
         file.buffer,
+        blobId,
       );
 
       reply
