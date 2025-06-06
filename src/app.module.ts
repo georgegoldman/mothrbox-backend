@@ -13,6 +13,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
 import { MailModule } from './mail/mail.module';
 import { OtpModule } from './otp/otp.module';
 // import { FastifyMulterModule } from '@nest-lab/fastify-multer';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OtpModule } from './otp/otp.module';
         limit: 100,
       },
     ]),
+    ApiModule,
     // FastifyMulterModule,
   ],
   controllers: [AppController],
