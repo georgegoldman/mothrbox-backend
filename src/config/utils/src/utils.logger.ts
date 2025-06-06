@@ -10,7 +10,6 @@ import {
   ConsoleLogger,
 } from '@nestjs/common';
 import BaseError from './util.errors';
-// import { timestamp } from 'rxjs';
 
 @Catch() // No specific exception type => This will catch all exceptions
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -43,12 +42,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
     };
 
-    // Check whether `response` has `.status()` (Express) or not (Fastify)
+    // Log the error
+    this.logger.error('Exception caught:', {
+      ...payload,
+      stack: exception instanceof Error ? exception.stack : undefined,
+    });
 
-    if (typeof response.status === 'function') {
-      response.status(status).json(payload); // express
+    // Check platform and use appropriate response method
+    if (response.status && response.json) {
+      // Express-style
+      response.status(status).json(payload);
+    } else if (response.status && response.send) {
+      // Fastify-style
+      response.status(status).send(payload);
     } else {
-      response.code?.(status).send(payload);
+      // Fallback for other platforms
+      response.statusCode = status;
+      response.end(JSON.stringify(payload));
     }
   }
 }
