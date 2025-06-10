@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
@@ -29,24 +30,23 @@ export class FileUploadService {
     file: Express.Multer.File,
     userId: string,
     alias: string,
-    walletAddress?: string,
+    walletAddress: string,
+    filename: string,
     blobId?: string,
-  ) {
+  ): Promise<any> {
     try {
       const cryptedBuffer = await this.mothrboxService.proxyBinaryCall(
         operation,
         userId,
         alias,
         file.buffer,
-        blobId,
+        walletAddress,
+        filename,
       );
 
       reply
-        .header('Content-Type', 'application/octet-stream')
-        .header(
-          'content-disposition',
-          `attachment; filename="${file.filename}"`,
-        )
+        .code(200)
+        .header('Content-Type', 'application/json')
         .send(cryptedBuffer);
     } catch (error) {
       console.error('Encryption error details:', {
